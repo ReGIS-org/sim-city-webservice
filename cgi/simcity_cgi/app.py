@@ -1,12 +1,10 @@
 from bottle import post, get, run, request, response, HTTPResponse
 import simcity
-from simcity.task import Token
-from util import abort, error, get_simulation_config
+from util import error, get_simulation_config
 from parameter import parse_parameters
 
-simcity_client.init('../../config.ini')
-config = simcity_client.config
-config_sim = config.section('Simulations')
+simcity.init('../../config.ini')
+config_sim = simcity.config.section('Simulations')
 
 @get('/app/simulate/<name>/<version>')
 def get_simulation_by_name_version( name, version = None ):
@@ -29,17 +27,17 @@ def simulate_name_version( name, version = None ):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
         sim = sim[version]
-        params = parse_parameters(dict(request.forms), cursim['parameters'])
+        params = parse_parameters(dict(request.forms), sim['parameters'])
     except HTTPResponse as ex:
         return ex
     
     token = simcity.task.add({
-        'command': cursim['command'],
+        'command': sim['command'],
         'version': version,
         'input': params
     })
     
-    couch_cfg = config.section('CouchDB')
+    couch_cfg = simcity.config.section('CouchDB')
     response.status = 201 # created
     response.set_header('Location', couch_cfg['url'] + couch_cfg['database'] + '/' + token.id)
     return token.value
@@ -51,7 +49,7 @@ def simulate_name( name ):
 @get('/app/overview')
 def overview():
     try:
-        return simcity_client.overview_total()
+        return simcity.overview_total()
     except:
         return error(500, "cannot read overview")
 
