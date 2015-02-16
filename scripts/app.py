@@ -1,3 +1,5 @@
+from gevent import monkey; monkey.patch_all()
+
 from bottle import post, get, run, request, response, HTTPResponse
 import simcity
 from simcity.util import listfiles
@@ -81,4 +83,4 @@ def submit_job_to_host(host):
             response.status = 201 # created
             return {key: job[key] for key in ['_id', 'batch_id', 'hostname']}
 
-run(host='localhost', port=9090)
+run(host='localhost', port=9090, server='gevent')

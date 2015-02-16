@@ -38,7 +38,7 @@ clean:
 	find . -name *.pyo -delete
 
 serve-dev: install
-	python scripts/app.py --debug --reload 
+	python -m bottle scripts.app --debug --reload --bind localhost:9090 -s gevent
 
 serve: install
-	python scripts/app.py
+	python -m bottle scripts.app --bind localhost:9090 -s gevent
