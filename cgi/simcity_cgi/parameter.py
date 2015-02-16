@@ -26,12 +26,12 @@ def parse_parameters(parameters, parameter_specs):
     return params
 
 def parse_parameter_spec(idict):        
-    default = idict.get('default', default=None)
+    default = idict.get('default')
     if idict['type'] == 'interval':
-        dtype = idict.get('dtype', default='float')
+        dtype = idict.get('dtype', 'float')
         return Interval(idict['min'], idict['max'], default, dtype)
     if idict['type'] == 'choice':
-        dtype = idict.get('dtype', default='str')
+        dtype = idict.get('dtype', 'str')
         return Choice(idict['choices'], default, dtype)
         
     raise ValueError('parameter type not recognized')
@@ -43,13 +43,14 @@ class ParameterSpec(object):
         'str': str
     }
     def __init__(self, default, dtype):
-        if type(dtype) == str:
+        if type(dtype) == type:
+            self._dtype = dtype
+        else:
             try:
                 self._dtype = ParameterSpec.TYPE_STR[dtype]
             except KeyError:
-                raise ValueError("Type " + dtype + " unknown; use one of " + str(ParameterSpec.keys()))
-        else:
-            self._dtype = dtype
+                raise ValueError("Type " + str(dtype) + " unknown; use one of " + str(ParameterSpec.keys()))
+
         self._default = self.coerce(default)
     
     @property
