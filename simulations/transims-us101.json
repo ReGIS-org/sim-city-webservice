@@ -1,0 +1,12 @@
+{
+    "latest": "0.1",
+    "stable": "0.1",
+    "0.1": {
+        "command": "~/sim-city-client/simulations/transims-us101.py",
+        "parameters":
+        {
+            "a": {"type": "interval", "min": 0, "max": 10, "default": 5, "dtype": "int", "unit": "meters"},
+            "b": {"type": "interval", "min": 0, "max": 10, "default": 5, "dtype": "int", "unit": "meters"}
+        }
+    }
+}
