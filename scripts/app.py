@@ -1,7 +1,7 @@
 from bottle import post, get, run, request, response, HTTPResponse
-import simcity
-from util import error, get_simulation_config
-from parameter import parse_parameters
+import simcity, simcity.web
+from simcity.web.util import error, get_simulation_config
+from simcity.web.parameter import parse_parameters
 
 simcity.init('../../config.ini')
 config_sim = simcity.config.section('Simulations')
