@@ -1,11 +1,12 @@
 from bottle import post, get, run, request, response, HTTPResponse
 import simcity
+from simcity.util import listfiles
 from simcityweb.util import error, get_simulation_config
 from simcityweb.parameter import parse_parameters
 
 config_sim = simcity.config.section('Simulations')
 
-@get('/app/simulate/<name>/<version>')
+@get('/explore/simulate/<name>/<version>')
 def get_simulation_by_name_version( name, version = None ):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
@@ -13,15 +14,24 @@ def get_simulation_by_name_version( name, version = None ):
     except HTTPResponse as ex:
         return ex
 
-@get('/app/simulate/<name>')
+@get('/explore/simulate/<name>')
 def get_simulation_by_name( name ):
     try:
         sim, version = get_simulation_config(name, None, config_sim)
         return sim
     except HTTPResponse as ex:
         return ex
+
+@get('/explore')
+def explore():
+    return "API: overview | simulate | job"
     
-@post('/app/simulate/<name>/<version>')
+@get('/explore/simulate')
+def simulate_list():
+    files = listfiles(config_sim['path'])
+    return {"simulations": [f[:-5] for f in files if f.endswith('.json')]}
+
+@post('/explore/simulate/<name>/<version>')
 def simulate_name_version( name, version = None ):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
@@ -38,25 +48,25 @@ def simulate_name_version( name, version = None ):
     
     couch_cfg = simcity.config.section('task-db')
     response.status = 201 # created
-    response.set_header('Location', couch_cfg['url'] + couch_cfg['database'] + '/' + token.id)
+    response.set_header('Location', couch_cfg['public_url'] + couch_cfg['database'] + '/' + token.id)
     return token.value
 
-@post('/app/simulate/<name>')
+@post('/explore/simulate/<name>')
 def simulate_name( name ):
     return simulate_name_version(name)
 
-@get('/app/overview')
+@get('/explore/overview')
 def overview():
     try:
         return simcity.overview_total()
     except:
         return error(500, "cannot read overview")
 
-@post('/app/job')
+@post('/explore/job')
 def submit_job():
     return submit_job_to_host(config_sim['default_host'])
 
-@post('/app/job/<host>')
+@post('/explore/job/<host>')
 def submit_job_to_host(host):
     try:
         job = simcity.job.submit_if_needed(host, config_sim['max_jobs'])
