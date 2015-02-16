@@ -3,7 +3,6 @@ import simcity
 from simcityweb.util import error, get_simulation_config
 from simcityweb.parameter import parse_parameters
 
-simcity.init('../../config.ini')
 config_sim = simcity.config.section('Simulations')
 
 @get('/app/simulate/<name>/<version>')

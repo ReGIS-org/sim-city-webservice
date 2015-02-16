@@ -37,7 +37,7 @@ clean:
 	find . -name *.pyc -delete
 	find . -name *.pyo -delete
 
-serve-develop: install
+serve-dev: install
 	python scripts/app.py --debug --reload 
 
 serve: install
