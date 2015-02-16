@@ -1,7 +1,7 @@
 from bottle import post, get, run, request, response, HTTPResponse
-import simcity, simcity.web
-from simcity.web.util import error, get_simulation_config
-from simcity.web.parameter import parse_parameters
+import simcity
+from simcityweb.util import error, get_simulation_config
+from simcityweb.parameter import parse_parameters
 
 simcity.init('../../config.ini')
 config_sim = simcity.config.section('Simulations')
@@ -72,4 +72,4 @@ def submit_job_to_host(host):
             response.status = 201 # created
             return {key: job[key] for key in ['_id', 'batch_id', 'hostname']}
 
-run(host='localhost', port=9090, debug=True, reloader=True)
+run(host='localhost', port=9090)

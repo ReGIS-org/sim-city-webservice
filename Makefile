@@ -1,4 +1,4 @@
-.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall
+.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve
 
 all: install
 
@@ -16,7 +16,7 @@ reinstall:
 
 pyflakes:
 	@echo "======= PyFlakes ========="
-	@find simcity -name '*.py' -exec pyflakes {} \;
+	@find simcityweb -name '*.py' -exec pyflakes {} \;
 	@find scripts -name '*.py' -exec pyflakes {} \;
 	@find tests -name '*.py' -exec pyflakes {} \;
 
@@ -36,3 +36,9 @@ clean:
 	rm -rf build/
 	find . -name *.pyc -delete
 	find . -name *.pyo -delete
+
+serve-develop: install
+	python scripts/app.py --debug --reload 
+
+serve: install
+	python scripts/app.py
