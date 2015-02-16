@@ -1,0 +1,11 @@
+{
+    "latest": "0.1",
+    "stable": "0.1",
+    "0.1": {
+        "command": "~/sim-city-client/simulations/matsim.py",
+        "parameters":
+        {
+            "model": {"type": "choice", "choices": ["tutorial", "blr"], "default": "tutorial", "dtype": "str"}
+        }
+    }
+}
