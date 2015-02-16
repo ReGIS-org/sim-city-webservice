@@ -38,7 +38,7 @@ def get_simulation_config(name, version, config_sim):
         abort(404, 'version "' + version + '" of simulation "' + name + '" not found')
     
     try:
-        while type(sim[version]) == str:
+        while type(sim[version]) != dict:
             version = sim[version]
     except KeyError:
         abort(500, 'simulation "' + name + '" is not fully configured on the server; contact the server administrator.')
