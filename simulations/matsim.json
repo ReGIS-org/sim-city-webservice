@@ -1,11 +1,16 @@
 {
-    "latest": "0.1",
-    "stable": "0.1",
-    "0.1": {
-        "command": "~/sim-city-client/simulations/matsim.py",
-        "parameters":
-        {
-            "model": {"type": "choice", "choices": ["tutorial", "blr"], "default": "tutorial", "dtype": "str"}
-        }
-    }
+  "latest": "0.1",
+  "stable": "0.1",
+  "0.1": {
+    "command": "~/sim-city-client/simulations/matsim.py",
+    "parameters":
+    [
+      { "name": "model",
+        "type": "choice",
+        "choices": ["tutorial", "blr"],
+        "default": "tutorial",
+        "dtype": "str",
+        "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"  }
+    ]
+  }
 }

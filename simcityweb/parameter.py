@@ -2,37 +2,37 @@ from util import abort, make_hash
 
 def parse_parameters(parameters, parameter_specs):
     paramset = frozenset(parameters)
-    param_specset = frozenset(parameter_specs)
+    param_specset = frozenset([param['name'] for param in parameter_specs])
     
     if not (paramset <= param_specset):
-        abort(400, "parameters " + str(list(paramset - param_specset)) + " not specified")
+        abort(400, "parameters " + str(list(paramset - param_specset)) + " not specified (" + str(parameters) + " vs spec " + str(parameter_specs))
     
     params = {}
-    for name, spec_raw in parameter_specs.items():
+    for spec_raw in parameter_specs:
         spec = parse_parameter_spec(spec_raw)
         try:
-            value = parameters[name]
-            del parameters[name]
+            value = parameters[spec.name]
+            del parameters[spec.name]
             value = spec.coerce(value)
         except KeyError:
-            params[name] = spec.default
+            params[spec.name] = spec.default
         except (TypeError, ValueError):
-            abort(400, "value of " + str(value) + " for parameter " + name + " does not comply to " + str(spec.dtype))
+            abort(400, "value of " + str(value) + " for parameter does not comply to " + str(spec.dtype))
         else:
             if spec.is_valid(value):
-                params[name] = value
+                params[spec.name] = value
             else:
-                abort(400, "value of " + str(value) + " for parameter " + name + " does not comply to " + str(spec))
+                abort(400, "value of " + str(value) + " for parameter does not comply to " + str(spec))
     return params
 
 def parse_parameter_spec(idict):        
-    default = idict.get('default')
+    default = idict.get('default', None)
     if idict['type'] == 'interval':
         dtype = idict.get('dtype', 'float')
-        return Interval(idict['min'], idict['max'], default, dtype)
+        return IntervalSpec(idict['name'], idict['min'], idict['max'], default, dtype)
     if idict['type'] == 'choice':
         dtype = idict.get('dtype', 'str')
-        return Choice(idict['choices'], default, dtype)
+        return ChoiceSpec(idict['name'], idict['choices'], default, dtype)
         
     raise ValueError('parameter type not recognized')
 
@@ -42,7 +42,7 @@ class ParameterSpec(object):
         'float': float,
         'str': str
     }
-    def __init__(self, default, dtype):
+    def __init__(self, name, default, dtype):
         if type(dtype) == type:
             self._dtype = dtype
         else:
@@ -50,8 +50,12 @@ class ParameterSpec(object):
                 self._dtype = ParameterSpec.TYPE_STR[dtype]
             except KeyError:
                 raise ValueError("Type " + str(dtype) + " unknown; use one of " + str(ParameterSpec.keys()))
-
-        self._default = self.coerce(default)
+        
+        if default is None:
+            self._default = None
+        else:
+            self._default = self.coerce(default)
+        self._name = name
     
     @property
     def default(self):
@@ -59,6 +63,9 @@ class ParameterSpec(object):
     @property
     def dtype(self):
         return self._dtype
+    @property
+    def name(self):
+        return self._name
         
     def coerce(self, value):
         if type(value) == self.dtype:
@@ -69,8 +76,8 @@ class ParameterSpec(object):
     def is_valid(self, value):
         raise NotImplementedError
 
-class Choice(ParameterSpec):
-    def __init__(self, choices, default, dtype):
+class ChoiceSpec(ParameterSpec):
+    def __init__(self, name, choices, default, dtype):
         if type(choices) != list:
             raise ValueError("Choices must be provided as a list")
         if len(choices) == 0:
@@ -78,7 +85,7 @@ class Choice(ParameterSpec):
         if default is None:
             default = choices[0]
         
-        super(Choice, self).__init__(default, dtype)
+        super(ChoiceSpec, self).__init__(name, default, dtype)
         self._choices = [self.coerce(choice) for choice in choices]
         self._choices.sort()
     
@@ -90,7 +97,7 @@ class Choice(ParameterSpec):
         return type(value) == self.dtype and value in self._choices
     
     def __str__(self):
-        return 'choice ' + str(self._choices) + ' ' + str(self.dtype)
+        return self.name + ': choice ' + str(self._choices) + ' ' + str(self.dtype)
         
     def __eq__(self, other):
         return type(self) == type(other) and self._choices == other._choices and self.default == other.default and self.dtype == other.dtype
@@ -98,11 +105,11 @@ class Choice(ParameterSpec):
     def __hash__(self):
         return make_hash(self._default, self.dtype, *self._choices)
         
-class Interval(ParameterSpec):
-    def __init__(self, min, max, default, dtype):
+class IntervalSpec(ParameterSpec):
+    def __init__(self, name, min, max, default, dtype):
         if default is None:
             default = (self._min + self._max) / 2
-        super(Interval, self).__init__(default, dtype)
+        super(IntervalSpec, self).__init__(name, default, dtype)
         
         self._min = self.coerce(min)
         self._max = self.coerce(max)
@@ -124,7 +131,7 @@ class Interval(ParameterSpec):
         return value >= self.min and value <= self.max and type(value) == self.dtype
 
     def __str__(self):
-        return 'interval [' + str(self.min) + ',' + str(self.max) + '] ' + str(self.dtype)
+        return self.name + ': interval [' + str(self.min) + ',' + str(self.max) + '] ' + str(self.dtype)
         
     def __eq__(self, other):
         return type(self) == type(other) and self._min == other._min and self._max == other._max and self._default == other._default and self.dtype == other.dtype
