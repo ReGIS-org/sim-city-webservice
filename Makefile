@@ -37,8 +37,8 @@ clean:
 	find . -name *.pyc -delete
 	find . -name *.pyo -delete
 
-serve-dev: install
+serve-dev:
 	python -m bottle scripts.app --debug --reload --bind localhost:9090 -s gevent
 
-serve: install
+serve:
 	python -m bottle scripts.app --bind localhost:9090 -s gevent
