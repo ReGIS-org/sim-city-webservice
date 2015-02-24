@@ -71,7 +71,7 @@ def submit_job():
 @post('/explore/job/<host>')
 def submit_job_to_host(host):
     try:
-        job = simcity.job.submit_if_needed(host, config_sim['max_jobs'])
+        job = simcity.job.submit_if_needed(host, int(config_sim['max_jobs']))
     except ValueError:
         return error(404, "Host " + host + " unknown")
     except IOError:
