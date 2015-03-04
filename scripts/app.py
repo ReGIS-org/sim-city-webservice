@@ -47,7 +47,12 @@ def simulate_name_version( name, version = None ):
         'version': version,
         'input': params
     })
-    
+
+    try:
+        simcity.job.submit_if_needed(config_sim['default_host'], 1)
+    except:
+        pass # too bad. User can call /explore/job.
+
     couch_cfg = simcity.config.section('task-db')
     response.status = 201 # created
     response.set_header('Location', couch_cfg['public_url'] + couch_cfg['database'] + '/' + token.id)
