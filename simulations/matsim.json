@@ -1,6 +1,6 @@
 {
-  "latest": "0.1",
-  "stable": "0.1",
+  "latest": "0.2",
+  "stable": "0.2",
   "0.1": {
     "command": "~/sim-city-client/simulations/matsim.py",
     "parameters":
@@ -11,6 +11,19 @@
         "default": "tutorial",
         "dtype": "str",
         "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"  }
+    ]
+  },
+  "0.2": {
+    "command": "~/bangalore-matsim-0.2/scripts/matsim.py",
+    "parameters":
+    [
+      { "name": "commute percentage",
+        "type": "interval",
+        "min": "0",
+        "max": "100",
+        "default": "5",
+        "dtype": "int",
+        "description": "percentage of the population (totalling 8.5 million) that commutes"  }
     ]
   }
 }
