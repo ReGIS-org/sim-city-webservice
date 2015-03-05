@@ -38,7 +38,7 @@ def simulate_name_version( name, version = None ):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
         sim = sim[version]
-        params = parse_parameters(dict(request.forms), sim['parameters'])
+        params = parse_parameters(dict(request.query), sim['parameters'])
     except HTTPResponse as ex:
         return ex
     

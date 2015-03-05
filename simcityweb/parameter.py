@@ -15,7 +15,7 @@ def parse_parameters(parameters, parameter_specs):
             del parameters[spec.name]
             value = spec.coerce(value)
         except KeyError:
-            params[spec.name] = spec.default
+            abort(400, "parameter for " + spec.name + " is not specified " + str(spec) + " ... " + str(parameters))
         except (TypeError, ValueError):
             abort(400, "value of " + str(value) + " for parameter does not comply to " + str(spec.dtype))
         else:

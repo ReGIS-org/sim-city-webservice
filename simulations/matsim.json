@@ -17,12 +17,13 @@
     "command": "~/bangalore-matsim-0.2/scripts/matsim.py",
     "parameters":
     [
-      { "name": "commute percentage",
+      { "title": "commute percentage",
+        "name": "commute-percentage",
         "type": "interval",
         "min": "0",
         "max": "100",
         "default": "5",
-        "dtype": "int",
+        "dtype": "float",
         "description": "percentage of the population (totalling 8.5 million) that commutes"  }
     ]
   }
