@@ -148,10 +148,14 @@ class IntervalSpec(ParameterSpec):
         return make_hash(self._min, self._max, self._default, self.dtype)
 
 def StringSpec(ParameterSpec):
-    def __init__(self, name, default, min_len = None, max_len = None):
+    def __init__(self, name, default, min_len, max_len):
         super(StringSpec, self).__init__(name, default, str)
-        self._min_len = min_len is None ? 0 : int(min_len)
-        self._max_len = max_len is None ? sys.maxsize : int(max_len)
+        if min_len is None:
+            min_len = 0
+        if max_len is None:
+            max_len = sys.maxsize
+        self._min_len = int(min_len)
+        self._max_len = int(max_len)
     
     @property
     def min_len(self):
