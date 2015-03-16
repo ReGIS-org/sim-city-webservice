@@ -1,4 +1,5 @@
 from util import abort, make_hash
+import sys
 
 def parse_parameters(parameters, parameter_specs):
     paramset = frozenset(parameters)
@@ -25,6 +26,7 @@ def parse_parameters(parameters, parameter_specs):
                 abort(400, "value of " + str(value) + " for parameter does not comply to " + str(spec))
     return params
 
+
 def parse_parameter_spec(idict):        
     default = idict.get('default', None)
     if idict['type'] == 'interval':
@@ -33,6 +35,10 @@ def parse_parameter_spec(idict):
     if idict['type'] == 'choice':
         dtype = idict.get('dtype', 'str')
         return ChoiceSpec(idict['name'], idict['choices'], default, dtype)
+    if idict['type'] == 'str':
+        min_len = idict.get('min_length', None)
+        max_len = idict.get('max_length', None)
+        return StringSpec(idict['name'], default, min_len, max_len)
         
     raise ValueError('parameter type not recognized')
 
@@ -70,6 +76,8 @@ class ParameterSpec(object):
     def coerce(self, value):
         if type(value) == self.dtype:
             return value
+        elif value is None and self.dtype == str:
+            return ''
         else:
             return self.dtype(value)
     
@@ -138,3 +146,29 @@ class IntervalSpec(ParameterSpec):
     
     def __hash__(self):
         return make_hash(self._min, self._max, self._default, self.dtype)
+
+def StringSpec(ParameterSpec):
+    def __init__(self, name, default, min_len = None, max_len = None):
+        super(StringSpec, self).__init__(name, default, str)
+        self._min_len = min_len is None ? 0 : int(min_len)
+        self._max_len = max_len is None ? sys.maxsize : int(max_len)
+    
+    @property
+    def min_len(self):
+        return self._min_len
+    @property
+    def max_len(self):
+        return self._max_len
+    
+    def is_valid(self, value):
+        return type(value) == self.dtype and len(value) >= self.min_len and len(value) <= self.max_len
+   
+    def __str__(self):
+        return self.name + ': str [len ' + str(self.min_len) + '-' + str(self.max_len) + ']'
+
+    def __eq__(self, other):
+        return type(self) == type(other) and self.min_len == other.min_len and self.max_len == other.max_len and self.default == other.default
+    
+    def __hash__(self):
+        return make_hash(self.min_len, self.max_len, self.default)
+   
