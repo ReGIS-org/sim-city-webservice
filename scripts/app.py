@@ -43,9 +43,10 @@ def simulate_name_version( name, version = None ):
         return ex
     
     token = simcity.task.add({
+        'name': name,
         'command': sim['command'],
         'version': version,
-        'input': params
+        'input': params,
     })
 
     try:
