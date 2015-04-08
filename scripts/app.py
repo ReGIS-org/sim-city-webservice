@@ -6,9 +6,10 @@ from simcity.util import listfiles
 from simcityweb.util import error, get_simulation_config
 from simcityweb.parameter import parse_parameters
 from couchdb.http import ResourceConflict
+from picas.documents import Document
 
-config_sim = simcity.config.section('Simulations')
-couch_cfg = simcity.config.section('task-db')
+config_sim = simcity.get_config().section('Simulations')
+couch_cfg = simcity.get_config().section('task-db')
 
 
 @get('/explore/simulate/<name>/<version>')
@@ -66,12 +67,12 @@ def simulate_name_version(name, version=None):
         task_props['_id'] = task_id
 
     try:
-        token = simcity.task.add(task_props)
+        token = simcity.add_task(task_props)
     except ResourceConflict:
         return error(400, "simulation name " + task_id + " already taken")
 
     try:
-        simcity.job.submit_if_needed(config_sim['default_host'], 1)
+        simcity.submit_if_needed(config_sim['default_host'], 1)
     except:
         pass  # too bad. User can call /explore/job.
 
@@ -103,7 +104,7 @@ def submit_job():
 @post('/explore/job/<host>')
 def submit_job_to_host(host):
     try:
-        job = simcity.job.submit_if_needed(host, int(config_sim['max_jobs']))
+        job = simcity.submit_if_needed(host, int(config_sim['max_jobs']))
     except ValueError:
         return error(404, "Host " + host + " unknown")
     except IOError:
@@ -119,13 +120,13 @@ def submit_job_to_host(host):
 @get('/explore/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     sim, version = get_simulation_config(name, version, config_sim)
-    doc_id = '_design/' + name + '_' + version
+    design_doc = name + '_' + version
+    doc_id = '_design/' + design_doc
+    task_db = simcity.get_task_database()
     try:
-        simcity.task.database.get(doc_id)
+        task_db.get(doc_id)
     except:
-        old_design = simcity.task.database.design_doc
-        simcity.task.database.design_doc = doc_id
-        simcity.task.database.add_view('all_docs', """
+        map_fun = """
 function(doc) {
   if (doc.type === "task" && doc.name === "%s" && doc.version === "%s") {
     emit(doc._id, {
@@ -138,8 +139,9 @@ function(doc) {
       "input": doc.input
     });
   }
-}""" % (name, version, '/couchdb/', couch_cfg['database']))
-        simcity.task.database.design_doc = old_design
+}""" % (name, version, '/couchdb/', couch_cfg['database'])
+        
+        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
 
     url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
                                       couch_cfg['database'], doc_id)
@@ -152,7 +154,7 @@ function(doc) {
 @get('/explore/simulation/<id>')
 def get_simulation(id):
     try:
-        return simcity.task.database.get(id).value
+        return simcity.get_task_database().get(id).value
     except ValueError:
         return error(404, "simulation does not exist")
 
@@ -165,10 +167,10 @@ def del_simulation(id):
     if rev is None:
         return error(409, "revision not specified")
 
-    task = simcity.task.Task({'_id': id, '_rev': rev})
+    task = Document({'_id': id, '_rev': rev})
 
     try:
-        simcity.task.database.delete(task)
+        simcity.get_task_database().delete(task)
         return {'ok': True}
     except ResourceConflict:
         return error(409, "resource conflict")
