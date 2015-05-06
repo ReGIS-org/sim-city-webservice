@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='simcityweb',
-      version='0.0.1',
+      version='0.1',
       description='Python SIM-CITY web service.',
       author='Joris Borgdorff',
       author_email='j.borgdorff@esciencecenter.nl',
