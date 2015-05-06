@@ -1,0 +1,24 @@
+[task-db]
+url = http://local.url:5984
+public_url = https://couch.example.com/
+username = myuser
+password = mypassword
+database = mytaskdatabase
+
+[job-db]
+url = http://local.url:5984
+public_url = https://couch.example.com/
+username = myuser
+password = mypassword
+database = myjobdatabase
+
+[mycluster-host]
+path = path/to/submitscript
+script = submitscript.sh
+host = myhostname
+method = ssh
+
+[Simulations]
+path = simulations
+max_jobs = 4
+default_host = mycluster
