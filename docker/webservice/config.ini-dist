@@ -1,0 +1,24 @@
+[task-db]
+url = http://${COUCHDB_HOST}
+public_url = https://<my-public-url>
+username = <edit-right-user>
+password = <edit-right-password>
+database = simcity
+
+[task-db]
+url = http://${COUCHDB_HOST}
+public_url = https://<my-public-url>
+username = <edit-right-user>
+password = <edit-right-password>
+database = simcity_jobs
+
+[Simulations]
+max_jobs = 4
+path = simulations
+default_host = <myhost>
+
+[<myhost>-host]
+script = <submitscript>
+path = <submitscript-path>
+host = <myhost>
+method = ssh
