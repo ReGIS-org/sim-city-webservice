@@ -1,4 +1,4 @@
--e git+https://github.com/NLeSC/sim-city-client.git@v0.3.4#egg=simcity-0.3.4
+-e git+https://github.com/NLeSC/sim-city-client.git@develop#egg=simcity-0.3.4
 bottle==0.12.8
 gevent==1.0.2
 greenlet==0.4.7
