@@ -10,7 +10,7 @@ test-requirements:
 
 install: requirements
 	@pip install .
-	
+
 reinstall:
 	@pip install --upgrade --no-deps .
 
@@ -42,3 +42,20 @@ serve-dev:
 
 serve:
 	python -m bottle scripts.app --bind localhost:9090 -s gevent
+
+docker-couchdb: docker/couchdb/local.ini docker/couchdb/Dockerfile
+	docker build -t simcity/couchdb docker/couchdb
+
+docker-osmium: docker/osmium/Dockerfile docker/osmium/joblauncher.yml docker/osmium/ssh_config docker/osmium/ssh_known_hosts
+	docker build -t simcity/osmium docker/osmium
+
+docker: docker-base docker/webservice/config.ini docker/webservice/Dockerfile
+	docker build -t simcity/webservice docker/webservice
+
+docker-base: docker/webservice-base/Dockerfile docker/webservice-base/start.sh
+	docker build -t nlesc/simcitywebservice docker/webservice-base
+
+docker-run: docker docker-osmium docker-couchdb
+	docker run --name osmium -d simcity/osmium
+	docker run --name couchdb -d -p 5984:5984 simcity/couchdb
+	docker run --name simcitywebservice -d -e COUCHDB_USERNAME -e COUCHDB_PASSWORD -p 9090:9090 --link couchdb:couchdb --link osmium:osmium simcity/webservice

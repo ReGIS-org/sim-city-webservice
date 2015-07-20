@@ -20,7 +20,8 @@ RUN virtualenv env \
   && . env/bin/activate \
   && pip install -U pip \
   && git checkout master \
-  && make install
+  && simcity_client_commit="d6aab4fced5072a69589a680d50095a7fc9dd051" \
+     make install
 
 USER root
 COPY /start.sh /
@@ -28,5 +29,4 @@ RUN chown simcity:simcity /start.sh && chmod +x /start.sh
 
 USER simcity
 EXPOSE 9090
-ENTRYPOINT ["/start.sh"]
-CMD ["simcity"]
+CMD ["/start.sh"]
