@@ -5,12 +5,15 @@ username = <edit-right-user>
 password = <edit-right-password>
 database = simcity
 
-[task-db]
+[job-db]
 url = http://${COUCHDB_HOST}
 public_url = https://<my-public-url>
 username = <edit-right-user>
 password = <edit-right-password>
 database = simcity_jobs
+
+[osmium]
+host = http://${OSMIUM_HOST}
 
 [Simulations]
 max_jobs = 4
@@ -20,5 +23,6 @@ default_host = <myhost>
 [<myhost>-host]
 script = <submitscript>
 path = <submitscript-path>
-host = <myhost>
-method = ssh
+launcher = <myhost>
+max_time = 15  # minutes
+method = osmium 
