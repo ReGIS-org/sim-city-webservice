@@ -1,4 +1,4 @@
-.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve
+.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve check-couchdb-env docker docker-run docker-osmium docker-couchdb docker-base
 
 all: install
 
@@ -55,11 +55,18 @@ docker: docker-base docker/webservice/config.ini docker/webservice/Dockerfile
 docker-base: docker/webservice-base/Dockerfile docker/webservice-base/start.sh
 	docker build -t nlesc/simcitywebservice docker/webservice-base
 
-docker-run: docker docker-osmium docker-couchdb
+check-couchdb-env:
+ifndef COUCHDB_USERNAME
+	$(error COUCHDB_USERNAME environment variable is not set. Use a CouchDB administrator)
+endif
+ifndef COUCHDB_PASSWORD
+	$(error COUCHDB_PASSWORD environment variable is not set. Use the CouchDB administrator password)
+endif
+
+docker-run: check-couchdb-env docker docker-osmium docker-couchdb
 	docker run --name osmium -d simcity/osmium
 	docker run --name couchdb -d -p 5984:5984 simcity/couchdb
 	docker run --name simcitywebservice -d -e COUCHDB_USERNAME -e COUCHDB_PASSWORD -p 9090:9090 --link couchdb:couchdb --link osmium:osmium simcity/webservice
 
 docker-clean:
 	docker rm -f osmium couchdb simcitywebservice
-
