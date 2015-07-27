@@ -10,14 +10,16 @@ Install by calling `make install` and serve on port 9090 using `make serve`.
 
 ## Building and deployment with Docker
 
-With docker, services are compartmentalized and installations standardized. First, configuration files need to be put in place.
+With docker, services are compartmentalized and installations standardized. First, configuration files need to be put in place. First run 
 
-1. CouchDB: `docker/couchdb/local.ini` can be edited from `docker/couchdb/local.ini-dist`. Put the admin user here, and set them as environment variables `export COUCHDB_USERNAME='<username>'` and `export COUCHDB_PASSWORD='<password>'`.
-2. Osmium: `docker/osmium/joblauncher.yml` can be edited from `docker/osmium/joblauncher.yml-dist`. Configure all hosts that jobs should be submitted to here. Also create an SSH key `ssh-keygen -f docker/osmium/ssh_key -N ""`, and create the right SSH config to SSH to the host in `docker/osmium/ssh_config`, and any mandatory known hosts in `docker/osmium/ssh_known_hosts`. See also [docker-osmium repository](https://github.com/NLeSC/docker-osmium).
-3. SIM-CITY webservice: `docker/webservice/config.ini` can be edited from `docker/webservice/config.ini-dist`. Put the configured CouchDB and Osmium information here.
+    ./configure-docker.py
+
+1. Osmium: edit `docker/osmium/joblauncher.yml`. See also [docker-osmium repository](https://github.com/NLeSC/docker-osmium).
+2. SIM-CITY webservice: edit `docker/webservice/config.ini`.
 
 To run the docker components, run
 
+    . couchdb.env
     make docker-run
 
 The web-service is accessible from port 9090, the CouchDB server on port 5984.

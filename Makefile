@@ -43,24 +43,31 @@ serve-dev:
 serve:
 	python -m bottle scripts.app --bind localhost:9090 -s gevent
 
-docker-couchdb: docker/couchdb/local.ini docker/couchdb/Dockerfile
+COUCHDB_CONFIG = docker/couchdb/local.ini couchdb.env
+OSMIUM_CONFIG = docker/osmium/joblauncher.yml docker/osmium/ssh_config docker/osmium/ssh_key docker/osmium/ssh_key.pub docker/osmium/ssh_known_hosts
+WEBSERVICE_CONFIG = docker/webservice/config.ini
+
+$(COUCHDB_CONFIG) $(OSMIUM_CONFIG) $(WEBSERVICE_CONFIG):
+	python configure-docker.py
+
+docker-couchdb: $(COUCHDB_CONFIG) docker/couchdb/Dockerfile
 	docker build -t simcity/couchdb docker/couchdb
 
-docker-osmium: docker/osmium/Dockerfile docker/osmium/joblauncher.yml docker/osmium/ssh_config docker/osmium/ssh_known_hosts
+docker-osmium: $(OSMIUM_CONFIG) docker/osmium/Dockerfile
 	docker build -t simcity/osmium docker/osmium
 
-docker: docker-base docker/webservice/config.ini docker/webservice/Dockerfile
+docker: docker-base $(WEBSERVICE_CONFIG) docker/webservice/Dockerfile
 	docker build -t simcity/webservice docker/webservice
 
 docker-base: docker/webservice-base/Dockerfile docker/webservice-base/start.sh
 	docker build -t nlesc/simcitywebservice docker/webservice-base
 
-check-couchdb-env:
+check-couchdb-env: $(COUCHDB_CONFIG)
 ifndef COUCHDB_USERNAME
-	$(error COUCHDB_USERNAME environment variable is not set. Use a CouchDB administrator)
+	$(error COUCHDB_USERNAME environment variable is not set. Run ". couchdb.env")
 endif
 ifndef COUCHDB_PASSWORD
-	$(error COUCHDB_PASSWORD environment variable is not set. Use the CouchDB administrator password)
+	$(error COUCHDB_PASSWORD environment variable is not set. Run ". couchdb.env")
 endif
 
 docker-run: check-couchdb-env docker docker-osmium docker-couchdb
