@@ -23,4 +23,4 @@ xenon:
 http:
   port: 9998
   adminPort: 9999
-  bindHost: localhost
+  bindHost: 0.0.0.0
