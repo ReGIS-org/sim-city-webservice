@@ -63,6 +63,7 @@ def configure():
                     copied = True
                 except IOError:
                     print("Cannot find file {} or {}.pub".format(path, path))
+            print(" => copied {}(.pub) to docker/osmium/ssh_key(.pub)".format(path))
         if confirm("Copy SSH config"):
             copied = False
             while not copied:
