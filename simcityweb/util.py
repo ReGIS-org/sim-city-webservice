@@ -35,8 +35,8 @@ def error(status, message):
 def abort(status, message):
     raise error(status, message)
 
-# Error checking
 
+# Error checking
 
 def get_simulation_config(name, version, config_sim):
     if '/' in name or '\\' in name:
