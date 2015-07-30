@@ -20,7 +20,7 @@ from bottle import post, get, run, delete, request, response, HTTPResponse
 import simcity
 from simcity.util import listfiles
 from simcityweb.util import error, get_simulation_config
-from simcityweb.parameter import parse_parameters
+import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
 
@@ -68,9 +68,11 @@ def simulate_name_version(name, version=None):
             task_id = query['_id']
             del query['_id']
 
-        params = parse_parameters(query, sim['parameters'])
+        params = simcityexplore.parse_parameters(query, sim['parameters'])
     except HTTPResponse as ex:
         return ex
+    except ValueError as ex:
+        return error(400, ex.message)
 
     task_props = {
         'name': name,
