@@ -3,3 +3,4 @@
 /couchdb.env
 *.bak
 /.coverage
+/fixtures
