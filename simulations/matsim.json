@@ -86,7 +86,8 @@
           "properties": [
             {"name": "name", "type": "str"},
           ]
-        }
+        },
+        "icon": "images/firestation.png"
       },
       {
         "title": "Fire",
@@ -97,7 +98,8 @@
         "default": "blr_fires",
         "contents": {
           "type": "point2d"
-        }
+        },
+        "icon": "images/fire.png"
       }
     ]
   }
