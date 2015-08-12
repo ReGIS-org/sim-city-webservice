@@ -84,7 +84,7 @@
         "contents": {
           "type": "point2d",
           "properties": [
-            {"name": "name", "type": "str"},
+            {"name": "name", "type": "str"}
           ]
         },
         "icon": "images/firestation.png"
