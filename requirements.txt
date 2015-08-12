@@ -4,4 +4,4 @@ bottle==0.12.8
 gevent==1.0.2
 greenlet==0.4.7
 -e git+https://github.com/djc/couchdb-python.git#egg=CouchDB-1.0.1
--e git+https://github.com/blootsvoets/picasclient.git@v0.2.3#egg=picas-0.2.3
+-e git+https://github.com/blootsvoets/picasclient.git@v0.2.4#egg=picas-0.2.4
