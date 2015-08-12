@@ -169,6 +169,40 @@ function(doc) {
     return
 
 
+@get('/explore/view/simulations/<name>/<version>/<ensemble>')
+def ensemble_view(name, version, ensemble):
+    sim, version = get_simulation_config(name, version, config_sim)
+    design_doc = '{}_{}_{}'.format(name, version, ensemble)
+    doc_id = '_design/' + design_doc
+    task_db = simcity.get_task_database()
+    try:
+        task_db.get(doc_id)
+    except:
+        map_fun = """
+function(doc) {
+  if (doc.type === "task" && doc.name === "%s" && doc.version === "%s" && doc.ensemble === "%s") {
+    emit(doc._id, {
+      "id": doc._id,
+      "rev": doc._rev,
+      "url": "%s%s/" + doc._id,
+      "error": doc.error,
+      "lock": doc.lock,
+      "done": doc.done,
+      "input": doc.input
+    });
+  }
+}""" % (name, version, ensemble, '/couchdb/', couch_cfg['database'])
+
+        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
+
+    url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
+                                      couch_cfg['database'], doc_id)
+
+    response.status = 302  # temporary redirect
+    response.set_header('Location', url)
+    return
+
+
 @get('/explore/simulation/<id>')
 def get_simulation(id):
     try:
