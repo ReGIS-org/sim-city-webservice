@@ -62,7 +62,7 @@ def simulate_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
         sim = sim[version]
-        query = dict(request.query)
+        query = dict(request.json)
         task_id = None
         if '_id' in query:
             task_id = query['_id']
@@ -95,7 +95,7 @@ def simulate_name_version(name, version=None):
         pass  # too bad. User can call /explore/job.
 
     response.status = 201  # created
-    url = '%s%s/%s' % (couch_cfg['public_url'], couch_cfg['database'],
+    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']), couch_cfg['database'],
                        token.id)
     response.set_header('Location', url)
     return token.value
