@@ -76,6 +76,7 @@ def simulate_name_version(name, version=None):
 
     task_props = {
         'name': name,
+        'ensemble': query['ensemble'],
         'command': sim['command'],
         'version': version,
         'input': params,
@@ -150,6 +151,7 @@ function(doc) {
     emit(doc._id, {
       "id": doc._id,
       "rev": doc._rev,
+      "ensemble": doc.ensemble,
       "url": "%s%s/" + doc._id,
       "error": doc.error,
       "lock": doc.lock,
