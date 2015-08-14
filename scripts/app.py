@@ -1,10 +1,26 @@
+# SIM-CITY webservice
+#
+# Copyright 2015 Joris Borgdorff <j.borgdorff@esciencecenter.nl>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from gevent import monkey; monkey.patch_all()
 
 from bottle import post, get, run, delete, request, response, HTTPResponse
 import simcity
 from simcity.util import listfiles
 from simcityweb.util import error, get_simulation_config
-from simcityweb.parameter import parse_parameters
+import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
 
@@ -46,18 +62,21 @@ def simulate_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
         sim = sim[version]
-        query = dict(request.query)
+        query = dict(request.json)
         task_id = None
         if '_id' in query:
             task_id = query['_id']
             del query['_id']
 
-        params = parse_parameters(query, sim['parameters'])
+        params = simcityexplore.parse_parameters(query, sim['parameters'])
     except HTTPResponse as ex:
         return ex
+    except ValueError as ex:
+        return error(400, ex.message)
 
     task_props = {
         'name': name,
+        'ensemble': query['ensemble'],
         'command': sim['command'],
         'version': version,
         'input': params,
@@ -77,7 +96,7 @@ def simulate_name_version(name, version=None):
         pass  # too bad. User can call /explore/job.
 
     response.status = 201  # created
-    url = '%s%s/%s' % (couch_cfg['public_url'], couch_cfg['database'],
+    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']), couch_cfg['database'],
                        token.id)
     response.set_header('Location', url)
     return token.value
@@ -132,6 +151,7 @@ function(doc) {
     emit(doc._id, {
       "id": doc._id,
       "rev": doc._rev,
+      "ensemble": doc.ensemble,
       "url": "%s%s/" + doc._id,
       "error": doc.error,
       "lock": doc.lock,
@@ -141,6 +161,40 @@ function(doc) {
   }
 }""" % (name, version, '/couchdb/', couch_cfg['database'])
         
+        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
+
+    url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
+                                      couch_cfg['database'], doc_id)
+
+    response.status = 302  # temporary redirect
+    response.set_header('Location', url)
+    return
+
+
+@get('/explore/view/simulations/<name>/<version>/<ensemble>')
+def ensemble_view(name, version, ensemble):
+    sim, version = get_simulation_config(name, version, config_sim)
+    design_doc = '{}_{}_{}'.format(name, version, ensemble)
+    doc_id = '_design/' + design_doc
+    task_db = simcity.get_task_database()
+    try:
+        task_db.get(doc_id)
+    except:
+        map_fun = """
+function(doc) {
+  if (doc.type === "task" && doc.name === "%s" && doc.version === "%s" && doc.ensemble === "%s") {
+    emit(doc._id, {
+      "id": doc._id,
+      "rev": doc._rev,
+      "url": "%s%s/" + doc._id,
+      "error": doc.error,
+      "lock": doc.lock,
+      "done": doc.done,
+      "input": doc.input
+    });
+  }
+}""" % (name, version, ensemble, '/couchdb/', couch_cfg['database'])
+
         task_db.add_view('all_docs', map_fun, design_doc=design_doc)
 
     url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],

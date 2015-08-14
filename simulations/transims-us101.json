@@ -6,13 +6,13 @@
     "parameters":
     [
       { "name": "a",
-        "type": "interval",
+        "type": "number",
         "min": 0, "max": 10,
         "default": 5,
         "dtype": "int",
         "unit": "meters"  },
       { "name": "b",
-        "type": "interval",
+        "type": "number",
         "min": 0,
         "max": 10,
         "default": 5,

@@ -1,2 +1,6 @@
 *.pyc
 /config*.ini
+/couchdb.env
+*.bak
+/.coverage
+/fixtures
