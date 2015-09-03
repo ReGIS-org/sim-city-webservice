@@ -96,8 +96,8 @@ def simulate_name_version(name, version=None):
         pass  # too bad. User can call /explore/job.
 
     response.status = 201  # created
-    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']), couch_cfg['database'],
-                       token.id)
+    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']),
+                       couch_cfg['database'], token.id)
     response.set_header('Location', url)
     return token.value
 
@@ -138,70 +138,21 @@ def submit_job_to_host(host):
 
 @get('/explore/view/simulations/<name>/<version>')
 def simulations_view(name, version):
-    sim, version = get_simulation_config(name, version, config_sim)
-    design_doc = name + '_' + version
-    doc_id = '_design/' + design_doc
-    task_db = simcity.get_task_database()
-    try:
-        task_db.get(doc_id)
-    except:
-        map_fun = """
-function(doc) {
-  if (doc.type === "task" && doc.name === "%s" && doc.version === "%s") {
-    emit(doc._id, {
-      "id": doc._id,
-      "rev": doc._rev,
-      "ensemble": doc.ensemble,
-      "url": "%s%s/" + doc._id,
-      "error": doc.error,
-      "lock": doc.lock,
-      "done": doc.done,
-      "input": doc.input
-    });
-  }
-}""" % (name, version, '/couchdb/', couch_cfg['database'])
-        
-        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
-
-    url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
-                                      couch_cfg['database'], doc_id)
-
-    response.status = 302  # temporary redirect
-    response.set_header('Location', url)
+    ensemble_view(name, version, None)
     return
 
 
 @get('/explore/view/simulations/<name>/<version>/<ensemble>')
 def ensemble_view(name, version, ensemble):
     sim, version = get_simulation_config(name, version, config_sim)
-    design_doc = '{}_{}_{}'.format(name, version, ensemble)
-    doc_id = '_design/' + design_doc
-    task_db = simcity.get_task_database()
-    try:
-        task_db.get(doc_id)
-    except:
-        map_fun = """
-function(doc) {
-  if (doc.type === "task" && doc.name === "%s" && doc.version === "%s" && doc.ensemble === "%s") {
-    emit(doc._id, {
-      "id": doc._id,
-      "rev": doc._rev,
-      "url": "%s%s/" + doc._id,
-      "error": doc.error,
-      "lock": doc.lock,
-      "done": doc.done,
-      "input": doc.input
-    });
-  }
-}""" % (name, version, ensemble, '/couchdb/', couch_cfg['database'])
+    url = '/couchdb/' + couch_cfg['database']
+    design_doc = simcityexplore.ensemble_view(
+        simcity.get_task_database(), name, version, url, ensemble)
 
-        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
-
-    url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
-                                      couch_cfg['database'], doc_id)
+    location = '{}/_design/{}/_view/all_docs' % (url, design_doc)
 
     response.status = 302  # temporary redirect
-    response.set_header('Location', url)
+    response.set_header('Location', location)
     return
 
 
