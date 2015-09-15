@@ -1,4 +1,4 @@
-.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve check-couchdb-env docker docker-run docker-osmium docker-couchdb docker-base
+.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve check-couchdb-env docker docker-run docker-osmium docker-couchdb docker-base docs
 
 all: install
 
@@ -77,3 +77,6 @@ docker-run: check-couchdb-env docker docker-osmium docker-couchdb
 
 docker-clean:
 	docker rm -f osmium couchdb simcitywebservice
+
+docs: docs/apiary.apib
+	aglio -i docs/apiary.apib -o docs/apiary.html
