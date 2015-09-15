@@ -77,11 +77,12 @@ def simulate_name_version(name, version=None):
 
     task_props = {
         'name': name,
-        'ensemble': query['ensemble'],
         'command': sim['command'],
         'version': version,
         'input': params,
     }
+    if 'ensemble' in params:
+        task_props['ensemble'] = params['ensemble']
 
     if task_id is not None:
         task_props['_id'] = task_id
