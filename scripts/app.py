@@ -141,7 +141,7 @@ def simulations_view(name, version):
     design_doc = simcityexplore.ensemble_view(
         simcity.get_task_database(), name, version, url, ensemble)
 
-    location = '{}/_design/{}/_view/all_docs' % (url, design_doc)
+    location = '{0}/_design/{1}/_view/all_docs'.format(url, design_doc)
 
     response.status = 302  # temporary redirect
     response.set_header('Location', location)
