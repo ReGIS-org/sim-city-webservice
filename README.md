@@ -1,6 +1,6 @@
 # Web interface to SIM-CITY
 
-Contains a Python JSON webservice for a SIM-CITY webserver. It uses the API from [SIM-CITY client](https://github.com/NLeSC/sim-city-client) to create simulation tasks, start new pilot jobs on computing infrastructure and query the status of the simulations and jobs.
+Contains a Python JSON webservice for a SIM-CITY webserver. It uses the API from [SIM-CITY client](https://github.com/NLeSC/sim-city-client) to create simulation tasks, start new pilot jobs on computing infrastructure and query the status of the simulations and jobs. Documentation of the API is in `docs/apiary.html`.
 
 ## Building and deployment
 

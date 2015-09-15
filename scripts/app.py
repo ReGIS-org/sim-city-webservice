@@ -16,7 +16,8 @@
 
 from gevent import monkey; monkey.patch_all()
 
-from bottle import post, get, run, delete, request, response, HTTPResponse
+from bottle import (post, get, run, delete, request, response, HTTPResponse,
+                    static_file)
 import simcity
 from simcity.util import listfiles
 from simcityweb.util import error, get_simulation_config
@@ -26,9 +27,9 @@ from picas.documents import Document
 
 config_sim = simcity.get_config().section('Simulations')
 couch_cfg = simcity.get_config().section('task-db')
+prefix = '/explore'
 
-
-@get('/explore/simulate/<name>/<version>')
+@get(prefix + '/simulate/<name>/<version>')
 def get_simulation_by_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
@@ -37,7 +38,7 @@ def get_simulation_by_name_version(name, version=None):
         return ex
 
 
-@get('/explore/simulate/<name>')
+@get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
         sim, version = get_simulation_config(name, None, config_sim)
@@ -46,18 +47,18 @@ def get_simulation_by_name(name):
         return ex
 
 
-@get('/explore')
+@get(prefix + '/')
 def explore():
-    return "API: overview | simulate | job"
+    return static_file('../docs/apiary.html')
 
 
-@get('/explore/simulate')
+@get(prefix + '/simulate')
 def simulate_list():
     files = listfiles(config_sim['path'])
     return {"simulations": [f[:-5] for f in files if f.endswith('.json')]}
 
 
-@post('/explore/simulate/<name>/<version>')
+@post(prefix + '/simulate/<name>/<version>')
 def simulate_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, config_sim)
@@ -96,18 +97,18 @@ def simulate_name_version(name, version=None):
         pass  # too bad. User can call /explore/job.
 
     response.status = 201  # created
-    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']), couch_cfg['database'],
-                       token.id)
+    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']),
+                       couch_cfg['database'], token.id)
     response.set_header('Location', url)
     return token.value
 
 
-@post('/explore/simulate/<name>')
+@post(prefix + '/simulate/<name>')
 def simulate_name(name):
     return simulate_name_version(name)
 
 
-@get('/explore/view/totals')
+@get(prefix + '/view/totals')
 def overview():
     try:
         return simcity.overview_total()
@@ -115,13 +116,9 @@ def overview():
         return error(500, "cannot read overview")
 
 
-@post('/explore/job')
+@post(prefix + '/job')
 def submit_job():
-    return submit_job_to_host(config_sim['default_host'])
-
-
-@post('/explore/job/<host>')
-def submit_job_to_host(host):
+    host = request.query.get('host', default=config_sim['default_host'])
     try:
         job = simcity.submit_if_needed(host, int(config_sim['max_jobs']))
     except ValueError:
@@ -136,76 +133,22 @@ def submit_job_to_host(host):
             return {key: job[key] for key in ['_id', 'batch_id', 'hostname']}
 
 
-@get('/explore/view/simulations/<name>/<version>')
+@get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
+    ensemble = request.query.get('ensemble')
     sim, version = get_simulation_config(name, version, config_sim)
-    design_doc = name + '_' + version
-    doc_id = '_design/' + design_doc
-    task_db = simcity.get_task_database()
-    try:
-        task_db.get(doc_id)
-    except:
-        map_fun = """
-function(doc) {
-  if (doc.type === "task" && doc.name === "%s" && doc.version === "%s") {
-    emit(doc._id, {
-      "id": doc._id,
-      "rev": doc._rev,
-      "ensemble": doc.ensemble,
-      "url": "%s%s/" + doc._id,
-      "error": doc.error,
-      "lock": doc.lock,
-      "done": doc.done,
-      "input": doc.input
-    });
-  }
-}""" % (name, version, '/couchdb/', couch_cfg['database'])
-        
-        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
+    url = '/couchdb/' + couch_cfg['database']
+    design_doc = simcityexplore.ensemble_view(
+        simcity.get_task_database(), name, version, url, ensemble)
 
-    url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
-                                      couch_cfg['database'], doc_id)
+    location = '{}/_design/{}/_view/all_docs' % (url, design_doc)
 
     response.status = 302  # temporary redirect
-    response.set_header('Location', url)
+    response.set_header('Location', location)
     return
 
 
-@get('/explore/view/simulations/<name>/<version>/<ensemble>')
-def ensemble_view(name, version, ensemble):
-    sim, version = get_simulation_config(name, version, config_sim)
-    design_doc = '{}_{}_{}'.format(name, version, ensemble)
-    doc_id = '_design/' + design_doc
-    task_db = simcity.get_task_database()
-    try:
-        task_db.get(doc_id)
-    except:
-        map_fun = """
-function(doc) {
-  if (doc.type === "task" && doc.name === "%s" && doc.version === "%s" && doc.ensemble === "%s") {
-    emit(doc._id, {
-      "id": doc._id,
-      "rev": doc._rev,
-      "url": "%s%s/" + doc._id,
-      "error": doc.error,
-      "lock": doc.lock,
-      "done": doc.done,
-      "input": doc.input
-    });
-  }
-}""" % (name, version, ensemble, '/couchdb/', couch_cfg['database'])
-
-        task_db.add_view('all_docs', map_fun, design_doc=design_doc)
-
-    url = '%s%s/%s/_view/all_docs' % ('/couchdb/',  # couch_cfg['public_url'],
-                                      couch_cfg['database'], doc_id)
-
-    response.status = 302  # temporary redirect
-    response.set_header('Location', url)
-    return
-
-
-@get('/explore/simulation/<id>')
+@get(prefix + '/simulation/<id>')
 def get_simulation(id):
     try:
         return simcity.get_task_database().get(id).value
@@ -213,7 +156,7 @@ def get_simulation(id):
         return error(404, "simulation does not exist")
 
 
-@delete('/explore/simulation/<id>')
+@delete(prefix + '/simulation/<id>')
 def del_simulation(id):
     rev = request.query.get('rev')
     if rev is None:
