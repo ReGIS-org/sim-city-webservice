@@ -24,6 +24,7 @@ from simcityweb.util import error, get_simulation_config
 import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
+import os
 
 config_sim = simcity.get_config().section('Simulations')
 couch_cfg = simcity.get_config().section('task-db')
@@ -49,7 +50,9 @@ def get_simulation_by_name(name):
 
 @get(prefix + '/')
 def explore():
-    return static_file('../docs/apiary.html')
+    file_dir = os.path.dirname(os.path.realpath(__file__))
+    project_dir = os.path.dirname(file_dir)
+    return static_file('docs/apiary.html',root=project_dir)
 
 
 @get(prefix + '/simulate')
