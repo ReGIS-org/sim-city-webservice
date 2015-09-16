@@ -173,4 +173,17 @@ def del_simulation(id):
     except ResourceConflict:
         return error(409, "resource conflict")
 
+
+@get(prefix + '/hosts')
+def get_hosts():
+    hosts = {}
+    for section in simcity.get_config().sections():
+        if section.endswith('-host'):
+            host_name = section[:-5]
+            hosts[host_name] = {}
+            if config_sim.get('default_host') == host_name:
+                hosts[host_name]['default'] = True
+
+    return hosts
+
 run(host='localhost', port=9090, server='gevent')
