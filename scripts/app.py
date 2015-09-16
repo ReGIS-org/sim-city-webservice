@@ -16,6 +16,7 @@
 
 from gevent import monkey; monkey.patch_all()
 
+import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file)
 import simcity
@@ -25,10 +26,17 @@ import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
 import os
+import json
 
 config_sim = simcity.get_config().section('Simulations')
 couch_cfg = simcity.get_config().section('task-db')
 prefix = '/explore'
+
+# Remove spaces from json output
+bottle.uninstall('json')
+bottle.install(bottle.JSONPlugin(
+    json_dumps=lambda x: json.dumps(x, separators=(',', ':'))))
+
 
 @get(prefix + '/simulate/<name>/<version>')
 def get_simulation_by_name_version(name, version=None):
@@ -189,4 +197,5 @@ def get_hosts():
 
     return hosts
 
-run(host='localhost', port=9090, server='gevent')
+if __name__ == '__main__':
+    run(host='localhost', port=9090, server='gevent')
