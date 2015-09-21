@@ -1,0 +1,414 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "SIM-CITY webservice",
+        "version": "",
+        "description": "The [SIM-CITY webservice](http://github.com/NLeSC/sim-city-webservice) starts\nsimulations and jobs using the\n[SIM-CITY client](http://github.com/NLeSC/sim-city-client).\n\n"
+    },
+    "host": "simcity.amsterdam-complexity.nl",
+    "basePath": "/explore/",
+    "schemes": [
+        "https"
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "API specification",
+                "description": "Swagger 2.0 API schema.\n\n",
+                "tags": [
+                    "API"
+                ],
+                "parameters": []
+            }
+        },
+        "/doc": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "API documentation",
+                "description": "This page.\n\n",
+                "tags": [
+                    "API"
+                ],
+                "parameters": [
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "one of `api-blueprint`, `html` or `swagger`, documentation format. Defaults to html.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/job": {
+            "post": {
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Submit job",
+                "description": "Start a job. Unless host is given, start the job on the default host.\n\n",
+                "tags": [
+                    "Jobs"
+                ],
+                "parameters": [
+                    {
+                        "name": "host",
+                        "in": "query",
+                        "description": "Host to start job on; one of the hosts given in /hosts.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/hosts": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Configured hosts",
+                "description": "Retrieve hosts configured under the webservice with basic (optional) metadata.\n\n",
+                "tags": [
+                    "Jobs"
+                ],
+                "parameters": []
+            }
+        },
+        "/simulate": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Simulation engines",
+                "description": "Get the names of the simulation engines configured in the webservice.\n\n",
+                "tags": [
+                    "Simulations"
+                ],
+                "parameters": []
+            }
+        },
+        "/simulate/{name}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Simulation engine versions",
+                "description": "Get the versions of a simulation engine and their configurations.\n\n",
+                "tags": [
+                    "Simulations"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Name of the simulation engine",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/simulate/{name}/{version}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Configuration",
+                "description": "Get the configuration and parameter specifications of a version of a simulation\nengine.\n\n",
+                "tags": [
+                    "Simulations"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Name of the simulation engine",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "description": "Simulation engine version. This may include\nversion references like \"latest\" or \"stable\".\n\n",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "post": {
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Start simulation",
+                "description": "Start a new simulation using the simulation engine. Parameters required by\nthe simulation engine should be provided in the request.\n\n",
+                "tags": [
+                    "Simulations"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Name of the simulation engine",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "description": "Simulation engine version. This may include\nversion references like \"latest\" or \"stable\".\n\n",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object",
+                            "required": [],
+                            "properties": {
+                                "_id": {
+                                    "type": "string"
+                                },
+                                "ensemble": {
+                                    "type": "string"
+                                },
+                                "simulation_specific_parameters": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "/simulation/{id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Simulation",
+                "description": "",
+                "tags": [
+                    "Simulations"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Simulation id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Delete simulation",
+                "description": "",
+                "tags": [
+                    "Simulations"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Simulation id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "rev",
+                        "in": "query",
+                        "description": "Revision of simulation, as retrieved from a previous get request.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/view/totals": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Overview",
+                "description": "Total number of jobs and tasks, categorized by status\n\n",
+                "tags": [
+                    "Monitoring"
+                ],
+                "parameters": []
+            }
+        },
+        "/view/simulations/{name}/{version}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {}
+                    },
+                    "302": {
+                        "description": "Moved Temporarily",
+                        "headers": {},
+                        "examples": {}
+                    }
+                },
+                "summary": "Active simulations",
+                "description": "Simulations configured for a certain simulation engine. If the ensemble name\nis given, only simulations for that ensemble are shown. Even if the result is\nprovided directly by a CouchDB database, the call to the webservice is needed\nto ensure that the correct database view exists.\n\n",
+                "tags": [
+                    "Monitoring"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "simulation engine name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "description": "simulation engine version",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ensemble",
+                        "in": "query",
+                        "description": "ensemble name",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {}
+}

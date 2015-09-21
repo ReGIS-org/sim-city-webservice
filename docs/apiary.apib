@@ -7,12 +7,23 @@ The [SIM-CITY webservice](http://github.com/NLeSC/sim-city-webservice) starts
 simulations and jobs using the
 [SIM-CITY client](http://github.com/NLeSC/sim-city-client).
 
-# Group Root
+# Group API
 
-# Documentation [GET /]
+# API specification [GET /]
+Swagger 2.0 API schema.
+
++ Response 200 (application/json)
+
+# API documentation [GET /doc{?format}]
 This page.
 
-+ Response 200 (text/html)
++ Parameters
+    + format (string) - one of `api-blueprint`, `html` or `swagger`, documentation format. Defaults to html.
+
++ Response 200
++ Response 409 (application/json)
+
+        {"error": "documentation type [type] not found, choose between [options]"}
 
 # Group Jobs
 
@@ -39,7 +50,7 @@ Retrieve hosts configured under the webservice with basic (optional) metadata.
     + Body
 
             {
-                "host1": {"default": true}
+                "host1": {"default": true},
                 "host2": {}
             }
 
@@ -50,7 +61,7 @@ Get the names of the simulation engines configured in the webservice.
 
 + Response 200 (application/json)
     + Attributes
-        + simulations: sim1, sim2 (array) - simulation names
+        + simulations: sim1, sim2 (array[string]) - simulation names
 
 ## Simulation engine versions [GET /simulate/{name}]
 Get the versions of a simulation engine and their configurations.
@@ -77,14 +88,14 @@ Get the versions of a simulation engine and their configurations.
                         {
                             "name": "name",
                             "type": "str",
-                            "min_length": 3
+                            "min_length": 3,
                             "max_length": 32
                         },
                         {
                             "name": "simitems",
                             "type": "number",
                             "min": 0,
-                            "max": 100
+                            "max": 100,
                             "dtype": "float"
                         }
                     ]
@@ -131,14 +142,14 @@ engine.
                     {
                         "name": "name",
                         "type": "str",
-                        "min_length": 3
+                        "min_length": 3,
                         "max_length": 32
                     },
                     {
                         "name": "simitems",
                         "type": "number",
                         "min": 0,
-                        "max": 100
+                        "max": 100,
                         "dtype": "float"
                     }
                 ]
@@ -196,10 +207,18 @@ the simulation engine should be provided in the request.
         + command: `my/path/to/command.py` (string) - command that will run the simulation
         + lock: 1439388534 (number) - time in seconds that computation on the task started (0 if none, -1 if error)
         + done: 1439390617 (number) - time in seconds that computation on the task finished (0 if none, -1 if error)
-        + uploads: `"file1.json": "http://mydav/path/file1.json"` (object) - output files, filename and URL
+        + uploads (object) - output files, filename and URL
+            + `some_filename`: http://mydav/path/file1.json (string) - URL of file
         + input: `"param1": 42` (object) - input parameters for the simulation.
         + output: `"value1": 21` (object) - output value from the simulation.
-        + `_attachments`: `"file2.json": {"content_type": "application/json", "length": 1000, ...}` (object) - files attached to the couchdb document.
+        + `_attachments` (object) - files attached to the couchdb document.
+            + `some_filename` (object)
+                + content_type: application/json (string) - content type of attachment
+                + length: 1000 (number) - length in bytes
+                + digest: `md5-abcdef` (string) - digest of the contents
+                + revpos: 1 (number) - document revision that the file was added or updated
+                + stub: true (boolean) - whether the attachment data is contained in the object
+                + data (string, optional) - actual attachment data
     + Body
 
             {
@@ -247,9 +266,8 @@ the simulation engine should be provided in the request.
             }
 
 + Response 404 (application/json)
-    + Body
 
-            {"error": "simulation does not exist"}
+        {"error": "simulation does not exist"}
 
 ### Delete simulation [DELETE /simulation/{id}{?rev}]
 
@@ -258,14 +276,12 @@ the simulation engine should be provided in the request.
     + rev (string) ... Revision of simulation, as retrieved from a previous get request.
 
 + Response 200 (application/json)
-    + Body
 
-            {"ok": true}
+        {"ok": true}
 
 + Response 409 (application/json)
-    + Body
 
-            {"error": "resource conflict or revision not specified"}
+        {"error": "resource conflict or revision not specified"}
 
 # Group Monitoring
 
@@ -299,31 +315,30 @@ to ensure that the correct database view exists.
     + ensemble: myensemble (string, optional) - ensemble name
 
 + Response 200 (application/json)
-    + Body
 
-            {
-                "total_rows": 10,
-                "offset": 0,
-                "rows": [
-                    {
+        {
+            "total_rows": 10,
+            "offset": 0,
+            "rows": [
+                {
+                    "id": "task_12345",
+                    "key": "task_12345",
+                    "value": {
                         "id": "task_12345",
-                        "key": "task_12345",
-                        "value": {
-                            "id": "task_12345",
-                            "rev": "3-abcdef",
-                            "ensemble": "myensemble",
-                            "url": "/couchdb/database/task_12345",
-                            "error": [ ],
-                            "lock": 1439388534,
-                            "done": 1439390617,
-                            "input": {
-                                "param1": 21,
-                            }
+                        "rev": "3-abcdef",
+                        "ensemble": "myensemble",
+                        "url": "/couchdb/database/task_12345",
+                        "error": [ ],
+                        "lock": 1439388534,
+                        "done": 1439390617,
+                        "input": {
+                            "param1": 21,
                         }
-                    },
-                    ...
-                ]
-            }
+                    }
+                },
+                ...
+            ]
+        }
 
 + Response 302 (application/json)
     + Headers

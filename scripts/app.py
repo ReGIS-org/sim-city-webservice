@@ -32,6 +32,10 @@ config_sim = simcity.get_config().section('Simulations')
 couch_cfg = simcity.get_config().section('task-db')
 prefix = '/explore'
 
+# Get project directory
+file_dir = os.path.dirname(os.path.realpath(__file__))
+project_dir = os.path.dirname(file_dir)
+
 # Remove spaces from json output
 bottle.uninstall('json')
 bottle.install(bottle.JSONPlugin(
@@ -55,12 +59,29 @@ def get_simulation_by_name(name):
     except HTTPResponse as ex:
         return ex
 
-
 @get(prefix + '/')
-def explore():
-    file_dir = os.path.dirname(os.path.realpath(__file__))
-    project_dir = os.path.dirname(file_dir)
-    return static_file('docs/apiary.html',root=project_dir)
+def root():
+    return get_doc_type('swagger')
+
+
+@get(prefix + '/doc')
+def get_doc():
+    doc_format = request.query.get('format', 'html')
+    return get_doc_type(doc_format)
+
+
+def get_doc_type(doctype):
+    docs = {
+        'html': 'apiary.html',
+        'swagger': 'swagger.json',
+        'api-blueprint': 'apiary.apib'
+    }
+    if doctype not in docs:
+        return error(409,
+            "documentation {0} not found. choose between {1}"
+            .format(doctype, list(docs.keys())))
+
+    return static_file(os.path.join('docs', 'apiary.html'),root=project_dir)
 
 
 @get(prefix + '/simulate')

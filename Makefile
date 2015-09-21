@@ -80,3 +80,4 @@ docker-clean:
 
 docs: docs/apiary.apib
 	aglio -i docs/apiary.apib -o docs/apiary.html
+	apib2swagger -i docs/apiary.apib -o docs/swagger.json
