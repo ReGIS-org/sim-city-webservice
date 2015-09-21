@@ -36,22 +36,28 @@ def abort(status, message):
     raise error(status, message)
 
 
-# Error checking
+def get_minified_filename(path, name, extension='json'):
+    if os.path.exists(os.path.join(path, name + '.min.' + extension)):
+        return name + '.min.' + extension
+    elif os.path.exists(os.path.join(path, name + '.' + extension)):
+        return name + '.' + extension
 
+    raise IOError('File {0}/{1}(.min).{2} does not exist'
+                  .format(path, name, extension))
+
+
+# Error checking
 def get_simulation_config(name, version, config_sim):
     if '/' in name or '\\' in name:
         abort(400, 'simulation name is malformed')
 
-    path = os.path.join(config_sim['path'], name + ".json")
     try:
-        with open(path) as f:
-            sim_str = f.read()
-    except:
+        filename = get_minified_filename(config_sim['path'], name)
+        with open(os.path.join(config_sim['path'], filename)) as f:
+            sim = json.load(f)
+    except IOError:
         abort(404, 'simulation "' + name + '" not found')
-
-    try:
-        sim = json.loads(sim_str)
-    except:
+    except ValueError:
         abort(500, 'simulation "' + name +
                    '" is not well configured on the server; ' +
                    'contact the server administrator.')

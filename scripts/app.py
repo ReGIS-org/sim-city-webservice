@@ -21,7 +21,8 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file)
 import simcity
 from simcity.util import listfiles
-from simcityweb.util import error, get_simulation_config
+from simcityweb.util import (error, get_simulation_config,
+                             get_minified_filename)
 import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
@@ -79,7 +80,7 @@ def get_doc_type(doctype):
     if doctype not in docs:
         return error(409,
             "documentation {0} not found. choose between {1}"
-            .format(doctype, list(docs.keys())))
+            .format(doctype, docs.keys()))
 
     return static_file(os.path.join('docs', 'apiary.html'),root=project_dir)
 

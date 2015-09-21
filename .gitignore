@@ -4,3 +4,4 @@
 *.bak
 /.coverage
 /fixtures
+*.min.json
