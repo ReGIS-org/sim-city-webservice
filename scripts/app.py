@@ -93,7 +93,7 @@ def get_schema_type(schematype):
     except IOError:
         return error(404, "schema {0} not found.".format(schematype))
 
-    return static_file(schema_filename, root=project_dir)
+    return static_file(schema_filename, root=schema_dir)
 
 
 @get(prefix + '/simulate')
