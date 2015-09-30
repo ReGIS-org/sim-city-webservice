@@ -28,7 +28,7 @@ test: test-requirements pyflakes unittest
 
 unittest-coverage:
 	@echo "======= Unit Tests ========="
-	@nosetests --with-coverage
+	@nosetests --with-coverage --cover-package=simcityweb
 
 fulltest: test-requirements pyflakes unittest-coverage
 
