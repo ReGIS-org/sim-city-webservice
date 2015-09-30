@@ -82,18 +82,7 @@ def get_doc_type(doctype):
             "documentation {0} not found. choose between {1}"
             .format(doctype, docs.keys()))
 
-    return static_file(os.path.join('docs', 'apiary.html'),root=project_dir)
-
-
-@get(prefix + '/schema/<schematype>')
-def get_schema_type(schematype):
-    schema_dir = os.path.join(project_dir, 'schemas')
-    try:
-        schema_filename = get_minified_filename(schema_dir, schematype)
-    except IOError:
-        return error(404, "schema {0} not found.".format(schematype))
-
-    return static_file(schema_filename, root=schema_dir)
+    return static_file(os.path.join('docs', docs[doctype]), root=project_dir)
 
 
 @get(prefix + '/simulate')
