@@ -93,4 +93,4 @@ minify: $(patsubst %.json, %.min.json, $(SIMULATIONS) $(SCHEMAS))
 # See http://stackoverflow.com/questions/592620/check-if-a-program-exists-from-a-bash-script
 %.min.json: %.json
 	@echo "$(JSON_MINIFY) $< > $@"
-	@sh -c "if command -v $(JSON_MINIFY) &>/dev/null; then if $(JSON_MINIFY) $< > $@.tmp; then mv $@.tmp $@; else rm $@.tmp; exit 1; fi; else echo 'WARNING: $(JSON_MINIFY_INSTALL)'; fi"
+	@sh -c "if command -v $(JSON_MINIFY) &>/dev/null; then $(JSON_MINIFY) $< > $@.tmp && mv $@.tmp $@ || rm $@.tmp && exit 1; else echo 'WARNING: $(JSON_MINIFY_INSTALL)'; fi"
