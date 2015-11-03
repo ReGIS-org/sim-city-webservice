@@ -21,8 +21,7 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file)
 import simcity
 from simcity.util import listfiles
-from simcityweb.util import (error, get_simulation_config,
-                             get_minified_filename)
+from simcityweb import error, get_simulation_config
 import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
@@ -46,7 +45,7 @@ bottle.install(bottle.JSONPlugin(
 @get(prefix + '/simulate/<name>/<version>')
 def get_simulation_by_name_version(name, version=None):
     try:
-        sim, version = get_simulation_config(name, version, config_sim)
+        sim, version = get_simulation_config(name, version, config_sim['path'])
         return sim[version]
     except HTTPResponse as ex:
         return ex
@@ -55,7 +54,7 @@ def get_simulation_by_name_version(name, version=None):
 @get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
-        sim, version = get_simulation_config(name, None, config_sim)
+        sim, version = get_simulation_config(name, None, config_sim['path'])
         return sim
     except HTTPResponse as ex:
         return ex
@@ -94,7 +93,7 @@ def simulate_list():
 @post(prefix + '/simulate/<name>/<version>')
 def simulate_name_version(name, version=None):
     try:
-        sim, version = get_simulation_config(name, version, config_sim)
+        sim, version = get_simulation_config(name, version, config_sim['path'])
         sim = sim[version]
         query = dict(request.json)
         task_id = None
@@ -170,7 +169,7 @@ def submit_job():
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
-    sim, version = get_simulation_config(name, version, config_sim)
+    sim, version = get_simulation_config(name, version, config_sim['path'])
     url = '/couchdb/' + couch_cfg['database']
     design_doc = simcityexplore.ensemble_view(
         simcity.get_task_database(), name, version, url, ensemble)

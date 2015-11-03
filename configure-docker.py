@@ -98,24 +98,25 @@ def configure():
             while confirm("Configure new Osmium launcher"):
                 launcher = {}
                 launcher['name'] = dialog("Launcher name")
-                launcher['scheduler'] = dialog(
+                launcher['scheduler'] = choice_dialog(
                     "Scheduler",
-                    options=['local', 'ssh', 'torque', 'slurm', 'gridengine'])
+                    ['local', 'ssh', 'torque', 'slurm', 'gridengine'])
                 launcher['scheduler-location'] = dialog(
                     "Scheduler location (user@host:port)")
                 launcher['queue'] = dialog("Scheduler queue")
-                launcher['sandbox'] = dialog(
-                    "Filesystem scheme", 'ssh',
-                    options=['local', 'ssh', 'ftp', 'gridftp'])
+                launcher['sandbox'] = choice_dialog(
+                    "Filesystem scheme", ['local', 'ssh', 'ftp', 'gridftp'],
+                    default_response='ssh')
                 launcher['sandbox-location'] = dialog(
                     "Filesystem location",
                     launcher['scheduler-location'])
                 osmium_config['launchers'].append(launcher)
 
             try:
-                osmium_config['default-launcher'] = dialog(
-                    'Default launcher', osmium_config['launchers'][0]['name'],
-                    options=[l['name'] for l in osmium_config['launchers']])
+                osmium_config['default-launcher'] = choice_dialog(
+                    'Default launcher',
+                    (l['name'] for l in osmium_config['launchers']),
+                    default_response=osmium_config['launchers'][0]['name'])
             except IndexError:
                 osmium_config['default-launcher'] = 'none'
 
@@ -167,9 +168,9 @@ def configure():
 
             all_hosts = [h['name'] for h in (webconfig['osmium-hosts'] +
                                              webconfig['ssh-hosts'])]
-            webconfig['default-host'] = dialog(
-                'Default host ({})'.format(str(all_hosts)),
-                all_hosts[0], options=all_hosts)
+            webconfig['default-host'] = choice_dialog(
+                'Default host', all_hosts,
+                default_response=all_hosts[0])
 
             with open('docker/webservice/config.ini', 'w') as f:
                 f.write(renderer.render_path(

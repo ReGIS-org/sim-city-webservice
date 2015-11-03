@@ -17,6 +17,9 @@
 import os
 
 
+_input_mechanism=raw_input
+
+
 def confirm(message, default_response=True):
     ''' Provide a command-line yes-no question for the user. '''
     truthy = ['y', 'yes']
@@ -29,34 +32,60 @@ def confirm(message, default_response=True):
         default_message = 'y/N'
 
     possible_answers = truthy + falsy
-    response = raw_input('{} [{}]? '.format(message, default_message)).lower()
+    response = _input_mechanism('{0} [{1}]? '
+                          .format(message, default_message)).lower()
     while response not in possible_answers:
-        response = raw_input('Please answer yes or no. {} [{}]? '
+        response = _input_mechanism('Please answer yes or no. {0} [{1}]? '
                              .format(message, default_message)).lower()
 
     return response in truthy
 
 
-def dialog(message, default_response=None, options=None):
+def dialog(message, default_response=None):
     ''' Provide a command-line dialog for the user. '''
-    if options is not None:
-        if len(options) == 0:
-            raise ValueError("Cannot choose from empty options")
-        elif len(options) == 1:
-            return options[0]
-        message = '{} ({})'.format(message, str(options)[1:-1])
-
     if default_response is None:
-        response = raw_input('{}: '.format(message))
-        while ((options is not None and response not in options) or
-               (options is None and response == '')):
-            response = raw_input("Value '{}' invalid. {}: "
-                                 .format(response, message))
+        response = _input_mechanism('{0}: '.format(message))
+        while response == '':
+            response = _input_mechanism("Value '{0}' invalid. {1}: "
+                                        .format(response, message))
     else:
-        response = raw_input('{} [{}]: '.format(message, default_response))
-        while options is not None and response not in [''] + options:
-            response = raw_input("Value '{}' invalid. {} [{}]: "
-                                 .format(response, message, default_response))
+        response = _input_mechanism('{} [{}]: '
+                                    .format(message, default_response))
+        if response == '':
+            response = default_response
+
+    return response
+
+
+def choice_dialog(message, options, default_response=None):
+    ''' Provide a command-line dialog for the user. '''
+    if len(options) == 0:
+        raise ValueError("Cannot choose from empty options")
+    elif len(options) == 1:
+        return next(iter(options))
+
+    message = '{0} ({1})'.format(message, str(list(options))[1:-1])
+
+    options = set(options)
+    if default_response is None:
+        response = _input_mechanism('{0}: '.format(message))
+        while response not in options:
+            response = _input_mechanism("Value '{0}' invalid. {1}: "
+                                        .format(response, message))
+    else:
+        if default_response not in options:
+            raise ValueError(
+                "Default response '{0}' is not part of options {1}"
+                .format(default_response, str(list(options))[1:-1]))
+        options.add('')
+
+        response = _input_mechanism('{} [{}]: '
+                                    .format(message, default_response))
+
+        while response not in options:
+            response = _input_mechanism("Value '{0}' invalid. {1} [{2}]: "
+                                        .format(response, message,
+                                                default_response))
 
         if response == '':
             response = default_response
@@ -64,11 +93,11 @@ def dialog(message, default_response=None, options=None):
     return response
 
 
-def new_or_overwrite(path, message=None):
+def new_or_overwrite(path, message=None, default_response=False):
     ''' Either given file does not exist, or the user has to confirm whether
         to overwrite it. '''
-    directory, file = os.path.split(path)
+    directory, filename = os.path.split(path)
     if message is None:
-        message = "{} exists, overwrite".format(file)
+        message = "{0} exists, overwrite".format(filename)
     return (not os.path.exists(path) or
-            confirm(message, default_response=False))
+            confirm(message, default_response=default_response))

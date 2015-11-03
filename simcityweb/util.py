@@ -47,34 +47,39 @@ def get_minified_filename(path, name, extension='json'):
 
 
 # Error checking
-def get_simulation_config(name, version, config_sim):
+def get_simulation_config(name, version, path):
     if '/' in name or '\\' in name:
         abort(400, 'simulation name is malformed')
 
     try:
-        filename = get_minified_filename(config_sim['path'], name)
-        with open(os.path.join(config_sim['path'], filename)) as f:
+        filename = get_minified_filename(path, name)
+        with open(os.path.join(path, filename)) as f:
             sim = json.load(f)
     except IOError:
-        abort(404, 'simulation "' + name + '" not found')
+        abort(404, 'simulation "{0}" not found'.format(name))
     except ValueError:
-        abort(500, 'simulation "' + name +
-                   '" is not well configured on the server; ' +
-                   'contact the server administrator.')
-
-    if version is None:
-        version = 'latest'
-
-    if version not in sim:
-        abort(404, 'version "' + version +
-              '" of simulation "' + name + '" not found')
-
+        abort(500, ('simulation "{0}" is not well configured on the server; '
+                    'contact the server administrator.').format(name))
     try:
-        while type(sim[version]) != dict:
-            version = sim[version]
+        version = get_simulation_version(sim, version)
     except KeyError:
-        abort(500, 'simulation "' + name +
-              '" is not fully configured on the server; ' +
-              'contact the server administrator.')
+        abort(404, 'version "{0}" of simulation "{1}" not found'
+              .format(version, name))
+    except ValueError:
+        abort(500, ('simulation "{0}" is not fully configured on the server; '
+                    'contact the server administrator.').format(name))
+    return sim, version
 
-    return (sim, version)
+
+def get_simulation_version(sim_specs, target_version):
+    if target_version is None:
+        target_version = 'latest'
+
+    if not isinstance(sim_specs[target_version], dict):
+        target_version = sim_specs[target_version]
+
+    if (target_version not in sim_specs or
+        not isinstance(sim_specs[target_version], dict)):
+        raise ValueError
+
+    return target_version
