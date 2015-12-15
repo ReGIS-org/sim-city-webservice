@@ -1,6 +1,6 @@
 # SIM-CITY webservice
 #
-# Copyright 2015 Joris Borgdorff <j.borgdorff@esciencecenter.nl>
+# Copyright 2015 Netherlands eScience Center
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ def dialog(message, default_response=None):
 
 
 def choice_dialog(message, options, default_response=None):
-    ''' Provide a command-line dialog for the user. '''
+    ''' Provide a command-line dialog with fixed options for the user. '''
     if len(options) == 0:
         raise ValueError("Cannot choose from empty options")
     elif len(options) == 1:
