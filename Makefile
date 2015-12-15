@@ -3,13 +3,13 @@
 all: install
 
 requirements:
+	@pip install Cython
 	@pip install -r requirements.txt
 
 test-requirements:
 	@pip install -r test_requirements.txt > /dev/null
 
 install: requirements minify
-	@pip install Cython
 	@pip install .
 
 reinstall:
