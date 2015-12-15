@@ -9,6 +9,7 @@ test-requirements:
 	@pip install -r test_requirements.txt > /dev/null
 
 install: requirements minify
+	@pip install Cython
 	@pip install .
 
 reinstall:
