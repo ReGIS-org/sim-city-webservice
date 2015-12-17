@@ -1,0 +1,99 @@
+{
+  "latest": "0.3",
+  "stable": "0.3",
+  "0.1": {
+    "command": "~/sim-city-client/simulations/matsim.py",
+    "type": "object",
+    "required": [ "model" ],
+    "properties": {
+      "model": {
+          "enum": ["tutorial", "blr"],
+          "default": "tutorial",
+          "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"
+        }
+    }
+  },
+  "0.2": {
+    "command": "~/bangalore-matsim-0.2/scripts/matsim.py",
+    "required": [ "commute-percentage" ],
+    "properties": {
+      "commute-percentage": {
+        "title": "commute percentage",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 5
+      }
+    }
+  },
+  "0.3": {
+    "command": "~/bangalore-matsim-0.3/matsim.py",
+    "required": [ "name", "commute-percentage" ],
+    "properties": {
+      "name": {
+        "title": "scenario name",
+        "type": "string",
+        "minLength": 3
+      },
+      "commute-percentage": {
+        "title": "commute percentage",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 5
+      }
+    }
+  },
+  "0.4": {
+    "command": "~/bangalore-matsim-0.4/matsim.py",
+    "type": "object",
+    "required": [ "ensemble", "simulation", "populationSampleFactor", "fireStations", "fires" ],
+    "properties": {
+      "ensemble": {
+        "title": "ensemble name",
+        "type": "string",
+        "minLength": 1,
+        "default": "none"
+      },
+      "simulation": {
+        "title": "scenario name",
+        "type": "string",
+        "minLength": 1
+      },
+      "populationSampleFactor": {
+        "title": "commute percentage",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 1
+      },
+      "fireStations": {
+        "title": "Fire stations",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "allOf": [
+            { "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d" },
+            { "properties": {
+                "name": { "type": "string" }
+            }}
+          ]
+        },
+        "icon": "images/firestation.png"
+      },
+      "fires": {
+        "title": "Fire",
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
+        },
+        "icon": "images/fire.png"
+      }
+    }
+  }
+}
