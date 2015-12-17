@@ -1,5 +1,5 @@
 -e git+https://github.com/NLeSC/sim-city-client.git@develop#egg=simcity-0.3.4
--e git+https://github.com/NLeSC/sim-city-explore.git@develop#egg=simcityexplore-0.0.1
+-e git+https://github.com/NLeSC/sim-city-explore.git@json-schema#egg=simcityexplore-0.0.1
 bottle==0.12.8
 gevent==1.0.2
 greenlet==0.4.7
