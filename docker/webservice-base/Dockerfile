@@ -2,7 +2,7 @@ FROM python:2.7
 MAINTAINER Joris Borgdorff <j.borgdorff@esciencecenter.nl>
 
 # install requirements
-RUN apt-get update -y && apt-get install -y git
+RUN apt-get update -y && apt-get install -y git && apt-get install -y default-jdk
 
 RUN groupadd -r simcity && useradd -d /var/lib/simcity -g simcity simcity \
   && mkdir /var/lib/simcity \
