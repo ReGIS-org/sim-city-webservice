@@ -115,7 +115,7 @@ def configure():
             try:
                 osmium_config['default-launcher'] = choice_dialog(
                     'Default launcher',
-                    (l['name'] for l in osmium_config['launchers']),
+                    [l['name'] for l in osmium_config['launchers']],
                     default_response=osmium_config['launchers'][0]['name'])
             except IndexError:
                 osmium_config['default-launcher'] = 'none'
