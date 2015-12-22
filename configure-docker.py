@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from simcityweb.cli import dialog, confirm, new_or_overwrite
+from simcityweb.cli import dialog, confirm, new_or_overwrite, choice_dialog
 import pystache
 import subprocess
 import shutil
