@@ -3,6 +3,7 @@
 all: install
 
 requirements:
+	@pip install Cython==0.23.4
 	@pip install -r requirements.txt
 
 test-requirements:
@@ -32,7 +33,7 @@ unittest-coverage:
 
 fulltest: test-requirements pyflakes unittest-coverage
 
-clean: 
+clean:
 	rm -rf build/
 	find . -name *.pyc -delete
 	find . -name *.pyo -delete
