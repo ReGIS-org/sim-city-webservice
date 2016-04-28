@@ -1,5 +1,5 @@
 {
-  "latest": "0.3",
+  "latest": "0.5",
   "stable": "0.3",
   "0.1": {
     "command": "~/sim-city-client/simulations/matsim.py",
@@ -94,6 +94,84 @@
         },
         "icon": "images/fire.png"
       }
+    }
+  },
+  "0.5": {
+    "command": "~/bangalore-matsim-0.4/matsim.py",
+    "resourceTypeUrl": "resource/matsim.json",
+    "form": [
+        "ensemble", 
+        "simulation", 
+        "populationSampleFactor",
+        {
+            "key": "fireStations",
+            "startEmpty": true,
+            "add": null,
+            "remove": null,
+            "type": "layer",
+            "layer": "matsim",
+            "featureId": "FireStation",
+            "items": [
+                {
+                    "type": "point2d"
+                }
+            ]
+        }, 
+        {
+            "key": "fires",
+            "startEmpty": true,
+            "add": null,
+            "remove": null,
+            "type": "layer",
+            "layer": "matsim",
+            "featureId": "Fire",
+            "items": [
+                {
+                    "type": "point2d"
+                }
+            ]
+        }
+    ],
+    "required": [ "ensemble", "simulation", "populationSampleFactor", "fireStations", "fires" ],
+    "properties": {
+        "ensemble": {
+            "minLength": "1",
+            "type": "string",
+            "title": "Ensemble Name"
+        },
+        "simulation": {
+            "minLength": "1",
+            "type": "string",
+            "title": "Scenario Name"
+        },
+        "populationSampleFactor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 1,
+            "title": "Commute Percentage",
+            "description": "percentage of the population (totalling 8.5 million) that commutes"
+        },
+        "fireStations": {
+            "title": "Fire stations",
+            "minItems": 0,
+            "type": "array",
+            "startEmpty": true,
+            "items": {
+                "$ref": "http://localhost/explore/schema/point2d"
+            },
+            "description": "Please add one or more fire stations to the map"
+        },
+        "fires": {
+            "title": "Fire",
+            "minItems": 1,
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+                "$ref": "http://localhost/explore/schema/point2d"
+            },
+            "description": "Please add exactly one (1) fire to the map"
+        }
     }
   }
 }

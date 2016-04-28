@@ -71,10 +71,9 @@ ifndef COUCHDB_PASSWORD
 	$(error COUCHDB_PASSWORD environment variable is not set. Run ". couchdb.env")
 endif
 
-docker-run: check-couchdb-env docker docker-osmium docker-couchdb
-	docker run --name osmium -d simcity/osmium
+docker-run: check-couchdb-env docker docker-couchdb
 	docker run --name couchdb -d -p 5984:5984 simcity/couchdb
-	docker run --name simcitywebservice -d -e COUCHDB_USERNAME -e COUCHDB_PASSWORD -p 9090:9090 --link couchdb:couchdb --link osmium:osmium simcity/webservice
+	docker run --name simcitywebservice -d -e COUCHDB_USERNAME -e COUCHDB_PASSWORD -p 9090:9090 --link couchdb:couchdb simcity/webservice
 
 docker-clean:
 	docker rm -f osmium couchdb simcitywebservice

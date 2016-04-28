@@ -21,7 +21,7 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file)
 import simcity
 from simcity.util import listfiles
-from simcityweb import error, get_simulation_config
+from simcityweb import error, get_simulation_config, get_json
 import simcityexplore
 from couchdb.http import ResourceConflict
 from picas.documents import Document
@@ -29,6 +29,8 @@ import os
 import json
 
 config_sim = simcity.get_config().section('Simulations')
+config_schema = simcity.get_config().section('Schemas')
+config_resources = simcity.get_config().section('Resources')
 couch_cfg = simcity.get_config().section('task-db')
 prefix = '/explore'
 
@@ -89,12 +91,14 @@ def simulate_list():
     files = listfiles(config_sim['path'])
     return {"simulations": [f[:-5] for f in files if f.endswith('.json')]}
 
-
 @post(prefix + '/simulate/<name>/<version>')
 def simulate_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, config_sim['path'])
         sim = sim[version]
+
+        print("request: " + str(request))
+
         query = dict(request.json)
         task_id = None
         if '_id' in query:
@@ -142,6 +146,31 @@ def simulate_name_version(name, version=None):
 def simulate_name(name):
     return simulate_name_version(name)
 
+@get(prefix + '/schema')
+def schema_list():
+    files = listfiles(config_schema['path'])
+    return {"schemas": [f[:-5] for f in files if f.endswith('.json')]}
+
+@get(prefix + '/schema/<name>')
+def schema_name(name):
+    try:
+        schema = get_json(name, config_schema['path'])
+        return schema
+    except HTTPResponse as ex:
+        return ex
+
+@get(prefix + '/resource')
+def resource_list():
+    files = listfiles(config_resources['path'])
+    return {"resources": [f[:-5] for f in files if f.endswith('.json')]}
+
+@get(prefix + '/resource/<name>')
+def resource_name(name):
+    try:
+        json = get_json(name, config_resources['path'])
+        return json
+    except HTTPResponse as ex:
+        return ex
 
 @get(prefix + '/view/totals')
 def overview():

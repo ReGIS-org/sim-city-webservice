@@ -283,6 +283,117 @@ the simulation engine should be provided in the request.
 
         {"error": "resource conflict or revision not specified"}
 
+
+# Group Resources
+
+## Resource type list [GET /resource]
+Get the names of the resource types configured in the webservice.
+
++ Response 200 (application/json)
+    + Attributes
+        + resources: type1, type2 (array[string]) - resource names
+
+## Resource type definition [GET /resource/{name}]
+Get the resource type.
+
++ Parameters
+    + name (string) ... Name of the resource type
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "id": "matsim",
+                "title": "matsim",
+                "featureTypes": {
+                    "FireStation": {
+                        "id": "SimCity#firestation",
+                        "name": "FireStation",
+                        "style": {
+                            "drawingMode": "Point",
+                            "iconUri": "images/brandweerposten/Brandweerkazerne.png",
+                            "cornerRadius": 50,
+                            "fillColor": "#ffffff",
+                            "iconWidth": 30,
+                            "iconHeight": 30,
+                            "strokeColor": "#ffffff"
+                        },
+                        "propertyTypeKeys": "title,notes",
+                        "u": "bower_components/csweb/dist-bower/images/marker.png"
+                    },
+                    "Fire": {
+                        "id": "SimCity#fire",
+                        "name": "Fire",
+                        "style": {
+                            "drawingMode": "Point",
+                            "iconUri": "data/images/fire.png",
+                            "cornerRadius": 50,
+                            "fillColor": "#ffffff",
+                            "iconWidth": 30,
+                            "iconHeight": 30,
+                            "strokeColor": "#ffffff"
+                        },
+                        "propertyTypeKeys": "title,notes",
+                        "u": "bower_components/csweb/dist-bower/images/marker.png"
+                    }
+                },
+                "propertyTypeData": {},
+                "isDynamic": false
+            }
+        
++ Response 404 (application/json)
+    + Attributes
+        + error: Resource type 'type1' not found. (string) - error message.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: Resource type malconfigured on server (string) - error message.
+
+# Group Schemas
+
+## Schema list [GET /schema]
+Get the names of the schemas configured in the webservice.
+
++ Response 200 (application/json)
+    + Attributes
+        + resources: schema1, schema2 (array[string]) - schema names
+            
+## Resource type definition [GET /schema/{name}]
+Get the resource type.
+
++ Parameters
+    + name (string) ... Name of the resource type
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                $schema: "http://json-schema.org/draft-04/schema#",
+                required: ["x", "y"],
+                type: "object",
+                id: "https://simcity.amsterdam-complexity.nl/explore/schema/point2d",
+                properties: {
+                    y: {
+                        type: "number"
+                    },
+                    x: {
+                        type: "number"
+                    },
+                    id: {
+                        type: "string"
+                    }
+                }
+            }
+
++ Response 404 (application/json)
+    + Attributes
+        + error: Resource type 'schema1' not found. (string) - error message.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: Resource type malconfigured on server (string) - error message.
+
+
 # Group Monitoring
 
 ## Overview [GET /view/totals]

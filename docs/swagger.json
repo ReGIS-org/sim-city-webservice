@@ -39,7 +39,11 @@
                     "409": {
                         "description": "Conflict",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "documentation type [type] not found, choose between [options]"
+                            }
+                        }
                     }
                 },
                 "summary": "API documentation",
@@ -64,7 +68,31 @@
                     "201": {
                         "description": "Created",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "_id": "job_hostname-uuid-seconds",
+                                "batch_id": "103024",
+                                "hostname": "example.com"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "_id": {
+                                    "type": "string",
+                                    "description": "job id"
+                                },
+                                "batch_id": {
+                                    "type": "string",
+                                    "description": "job id according to the queueing system"
+                                },
+                                "hostname": {
+                                    "type": "string",
+                                    "description": "hostname of the queueing system it was submitted to"
+                                }
+                            }
+                        }
                     },
                     "409": {
                         "description": "Conflict",
@@ -104,7 +132,14 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "host1": {
+                                    "default": true
+                                },
+                                "host2": {}
+                            }
+                        }
                     }
                 },
                 "summary": "Configured hosts",
@@ -121,7 +156,24 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "simulations": [
+                                    "sim1",
+                                    "sim2"
+                                ]
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "simulations": {
+                                    "type": "array",
+                                    "description": "simulation names"
+                                }
+                            }
+                        }
                     }
                 },
                 "summary": "Simulation engines",
@@ -138,22 +190,97 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "latest": "0.3",
+                                "stable": "0.3",
+                                "0.3": {
+                                    "command": "path/to/sim-city-client/simulation.py",
+                                    "parameters": [
+                                        {
+                                            "name": "model",
+                                            "type": "choice",
+                                            "choices": [
+                                                "type1",
+                                                "type2"
+                                            ],
+                                            "default": "type1",
+                                            "description": "model instance to run"
+                                        },
+                                        {
+                                            "name": "name",
+                                            "type": "str",
+                                            "min_length": 3,
+                                            "max_length": 32
+                                        },
+                                        {
+                                            "name": "simitems",
+                                            "type": "number",
+                                            "min": 0,
+                                            "max": 100,
+                                            "dtype": "float"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "simulation name is malformed"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Not Found",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "Simulation 'sim3' not found."
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "simulation malconfigured on server"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
                     }
                 },
                 "summary": "Simulation engine versions",
@@ -178,17 +305,74 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "command": "path/to/sim-city-client/simulation.py",
+                                "parameters": [
+                                    {
+                                        "name": "model",
+                                        "type": "choice",
+                                        "choices": [
+                                            "type1",
+                                            "type2"
+                                        ],
+                                        "default": "type1",
+                                        "description": "model instance to run"
+                                    },
+                                    {
+                                        "name": "name",
+                                        "type": "str",
+                                        "min_length": 3,
+                                        "max_length": 32
+                                    },
+                                    {
+                                        "name": "simitems",
+                                        "type": "number",
+                                        "min": 0,
+                                        "max": 100,
+                                        "dtype": "float"
+                                    }
+                                ]
+                            }
+                        }
                     },
                     "404": {
                         "description": "Not Found",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "Version '0.5' of simulation 'sim1' not found."
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "simulation malconfigured on server"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
                     }
                 },
                 "summary": "Configuration",
@@ -223,17 +407,59 @@
                     "400": {
                         "description": "Bad Request",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "simulation name task_12345 already taken"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Not Found",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "Version '0.5' of simulation 'sim1' not found."
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "simulation malconfigured on server"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
                     }
                 },
                 "summary": "Start simulation",
@@ -261,7 +487,10 @@
                         "in": "body",
                         "schema": {
                             "type": "object",
-                            "required": [],
+                            "required": [
+                                "ensemble",
+                                "simulation_specific_parameters"
+                            ],
                             "properties": {
                                 "_id": {
                                     "type": "string"
@@ -284,12 +513,113 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {}
+                        "examples": {},
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "_id": {
+                                    "type": "string",
+                                    "description": "simulation id"
+                                },
+                                "_rev": {
+                                    "type": "string",
+                                    "description": "simulation revision in the database"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "simulation engine name"
+                                },
+                                "version": {
+                                    "type": "string",
+                                    "description": "simulation engine version"
+                                },
+                                "ensemble": {
+                                    "type": "string",
+                                    "description": "ensemble name"
+                                },
+                                "hostname": {
+                                    "type": "string",
+                                    "description": "hostname that the simulation was run on"
+                                },
+                                "command": {
+                                    "type": "string",
+                                    "description": "command that will run the simulation"
+                                },
+                                "lock": {
+                                    "type": "number",
+                                    "description": "time in seconds that computation on the task started (0 if none, -1 if error)"
+                                },
+                                "done": {
+                                    "type": "number",
+                                    "description": "time in seconds that computation on the task finished (0 if none, -1 if error)"
+                                },
+                                "uploads": {
+                                    "type": "object",
+                                    "properties": {
+                                        "some_filename": {
+                                            "type": "string",
+                                            "description": "URL of file"
+                                        }
+                                    },
+                                    "description": "output files, filename and URL"
+                                },
+                                "input": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": "input parameters for the simulation."
+                                },
+                                "output": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": "output value from the simulation."
+                                },
+                                "_attachments": {
+                                    "type": "object",
+                                    "properties": {
+                                        "some_filename": {
+                                            "type": "object",
+                                            "properties": {
+                                                "content_type": {
+                                                    "type": "string",
+                                                    "description": "content type of attachment"
+                                                },
+                                                "length": {
+                                                    "type": "number",
+                                                    "description": "length in bytes"
+                                                },
+                                                "digest": {
+                                                    "type": "string",
+                                                    "description": "digest of the contents"
+                                                },
+                                                "revpos": {
+                                                    "type": "number",
+                                                    "description": "document revision that the file was added or updated"
+                                                },
+                                                "stub": {
+                                                    "type": "boolean",
+                                                    "description": "whether the attachment data is contained in the object"
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "description": "actual attachment data"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "description": "files attached to the couchdb document."
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Not Found",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "simulation does not exist"
+                            }
+                        }
                     }
                 },
                 "summary": "Simulation",
@@ -312,12 +642,20 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "ok": true
+                            }
+                        }
                     },
                     "409": {
                         "description": "Conflict",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "resource conflict or revision not specified"
+                            }
+                        }
                     }
                 },
                 "summary": "Delete simulation",
@@ -343,7 +681,177 @@
                 ]
             }
         },
-        "/view/totals": {
+        "/resource": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "resources": [
+                                    "type1",
+                                    "type2"
+                                ]
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "resources": {
+                                    "type": "array",
+                                    "description": "resource names"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Resource type list",
+                "description": "Get the names of the resource types configured in the webservice.\n\n",
+                "tags": [
+                    "Resources"
+                ],
+                "parameters": []
+            }
+        },
+        "/resource/{name}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "id": "matsim",
+                                "title": "matsim",
+                                "featureTypes": {
+                                    "FireStation": {
+                                        "id": "SimCity#firestation",
+                                        "name": "FireStation",
+                                        "style": {
+                                            "drawingMode": "Point",
+                                            "iconUri": "images/brandweerposten/Brandweerkazerne.png",
+                                            "cornerRadius": 50,
+                                            "fillColor": "#ffffff",
+                                            "iconWidth": 30,
+                                            "iconHeight": 30,
+                                            "strokeColor": "#ffffff"
+                                        },
+                                        "propertyTypeKeys": "title,notes",
+                                        "u": "bower_components/csweb/dist-bower/images/marker.png"
+                                    },
+                                    "Fire": {
+                                        "id": "SimCity#fire",
+                                        "name": "Fire",
+                                        "style": {
+                                            "drawingMode": "Point",
+                                            "iconUri": "data/images/fire.png",
+                                            "cornerRadius": 50,
+                                            "fillColor": "#ffffff",
+                                            "iconWidth": 30,
+                                            "iconHeight": 30,
+                                            "strokeColor": "#ffffff"
+                                        },
+                                        "propertyTypeKeys": "title,notes",
+                                        "u": "bower_components/csweb/dist-bower/images/marker.png"
+                                    }
+                                },
+                                "propertyTypeData": {},
+                                "isDynamic": false
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "error": "Resource type 'type1' not found."
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "error": "Resource type malconfigured on server"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Resource type definition",
+                "description": "Get the resource type.\n\n",
+                "tags": [
+                    "Resources"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Name of the resource type",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/schema": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "resources": [
+                                    "schema1",
+                                    "schema2"
+                                ]
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "resources": {
+                                    "type": "array",
+                                    "description": "schema names"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Schema list",
+                "description": "Get the names of the schemas configured in the webservice.\n\n",
+                "tags": [
+                    "Schemas"
+                ],
+                "parameters": []
+            }
+        },
+        "/schema/{name}": {
             "get": {
                 "responses": {
                     "200": {
@@ -351,10 +859,136 @@
                         "headers": {},
                         "examples": {}
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "error": "Resource type 'schema1' not found."
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "headers": {},
-                        "examples": {}
+                        "examples": {
+                            "application/json": {
+                                "error": "Resource type malconfigured on server"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message."
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Resource type definition",
+                "description": "Get the resource type.\n\n",
+                "tags": [
+                    "Schemas"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Name of the resource type",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/view/totals": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "todo": 0,
+                                "locked": 0,
+                                "done": 0,
+                                "error": 0,
+                                "pending_jobs": 0,
+                                "active_jobs": 0,
+                                "finished_jobs": 0,
+                                "archived_jobs": 0
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "todo": {
+                                    "type": "number",
+                                    "description": "number of tasks to be done"
+                                },
+                                "locked": {
+                                    "type": "number",
+                                    "description": "number of tasks currently being processed"
+                                },
+                                "done": {
+                                    "type": "number",
+                                    "description": "number of tasks done processing"
+                                },
+                                "error": {
+                                    "type": "number",
+                                    "description": "number of tasks that resulted in error"
+                                },
+                                "pending_jobs": {
+                                    "type": "number",
+                                    "description": "number of jobs submitted but not started"
+                                },
+                                "active_jobs": {
+                                    "type": "number",
+                                    "description": "number of jobs currently being processed. This number may include jobs that were stopped before reporting that they were finished."
+                                },
+                                "finished_jobs": {
+                                    "type": "number",
+                                    "description": "number of jobs that have finished processing. This number may include jobs that have reported finished but failed to be reported as queued."
+                                },
+                                "archived_jobs": {
+                                    "type": "number",
+                                    "description": "number of jobs that were archived after completing the entire pipeline of pending to finished."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "error": "failed to retrieve overview"
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
                     }
                 },
                 "summary": "Overview",
@@ -374,7 +1008,7 @@
                         "examples": {}
                     },
                     "302": {
-                        "description": "Moved Temporarily",
+                        "description": "Found",
                         "headers": {},
                         "examples": {}
                     }
@@ -410,5 +1044,19 @@
             }
         }
     },
-    "definitions": {}
+    "definitions": {
+        "API specification": {},
+        "API documentation": {},
+        "Submit job": {},
+        "Configured hosts": {},
+        "Simulation engines": {},
+        "Simulation engine versions": {},
+        "Specific simulation engine": {},
+        "Simulation": {},
+        "Resource type list": {},
+        "Resource type definition": {},
+        "Schema list": {},
+        "Overview": {},
+        "Active simulations": {}
+    }
 }
