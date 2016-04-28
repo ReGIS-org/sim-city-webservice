@@ -3,104 +3,97 @@
   "stable": "0.3",
   "0.1": {
     "command": "~/sim-city-client/simulations/matsim.py",
-    "parameters": [
-      {
-        "name": "model",
-        "type": "choice",
-        "choices": ["tutorial", "blr"],
-        "default": "tutorial",
-        "dtype": "str",
-        "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"
-      }
-    ]
+    "type": "object",
+    "required": [ "model" ],
+    "properties": {
+      "model": {
+          "enum": ["tutorial", "blr"],
+          "default": "tutorial",
+          "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"
+        }
+    }
   },
   "0.2": {
     "command": "~/bangalore-matsim-0.2/scripts/matsim.py",
-    "parameters": [
-      {
+    "required": [ "commute-percentage" ],
+    "properties": {
+      "commute-percentage": {
         "title": "commute percentage",
-        "name": "commute-percentage",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
         "type": "number",
-        "min": "0",
-        "max": "100",
-        "default": "5",
-        "dtype": "float",
-        "description": "percentage of the population (totalling 8.5 million) that commutes"
+        "minimum": 0,
+        "maximum": 100,
+        "default": 5
       }
-    ]
+    }
   },
   "0.3": {
     "command": "~/bangalore-matsim-0.3/matsim.py",
-    "parameters": [
-      {
+    "required": [ "name", "commute-percentage" ],
+    "properties": {
+      "name": {
         "title": "scenario name",
-        "name": "name",
-        "type": "str",
-        "min_length": "3"
+        "type": "string",
+        "minLength": 3
       },
-      {
+      "commute-percentage": {
         "title": "commute percentage",
-        "name": "commute-percentage",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
         "type": "number",
-        "min": "0",
-        "max": "100",
-        "default": "5",
-        "dtype": "float",
-        "description": "percentage of the population (totalling 8.5 million) that commutes"
+        "minimum": 0,
+        "maximum": 100,
+        "default": 5
       }
-    ]
+    }
   },
   "0.4": {
     "command": "~/bangalore-matsim-0.4/matsim.py",
-    "parameters": [
-      {
+    "type": "object",
+    "required": [ "ensemble", "simulation", "populationSampleFactor", "fireStations", "fires" ],
+    "properties": {
+      "ensemble": {
         "title": "ensemble name",
-        "name": "ensemble",
-        "type": "str",
-        "min_length": "1"
+        "type": "string",
+        "minLength": 1,
+        "default": "none"
       },
-      {
+      "simulation": {
         "title": "scenario name",
-        "name": "simulation",
-        "type": "str",
-        "min_length": "1"
+        "type": "string",
+        "minLength": 1
       },
-      {
+      "populationSampleFactor": {
         "title": "commute percentage",
-        "name": "populationSampleFactor",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
         "type": "number",
-        "dtype": "float",
-        "min": "0",
-        "max": "100",
-        "default": "1",
-        "description": "percentage of the population (totalling 8.5 million) that commutes"
+        "minimum": 0,
+        "maximum": 100,
+        "default": 1
       },
-      {
+      "fireStations": {
         "title": "Fire stations",
-        "name": "fireStations",
-        "type": "list",
-        "min_length": 1,
-        "default": "blr_firestations",
-        "contents": {
-          "type": "point2d",
-          "properties": [
-            {"name": "name", "type": "str"}
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "allOf": [
+            { "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d" },
+            { "properties": {
+                "name": { "type": "string" }
+            }}
           ]
         },
         "icon": "images/firestation.png"
       },
-      {
+      "fires": {
         "title": "Fire",
-        "name": "fires",
-        "type": "list",
-        "min_length": 1,
-        "max_length": 1,
-        "default": "blr_fires",
-        "contents": {
-          "type": "point2d"
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
         },
         "icon": "images/fire.png"
       }
-    ]
+    }
   }
 }

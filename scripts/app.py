@@ -101,20 +101,22 @@ def simulate_name_version(name, version=None):
             task_id = query['_id']
             del query['_id']
 
-        params = simcityexplore.parse_parameters(query, sim['parameters'])
+        simcityexplore.parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
         return error(400, ex.message)
+    except EnvironmentError as ex:
+        return error(500, ex.message)
 
     task_props = {
         'name': name,
         'command': sim['command'],
         'version': version,
-        'input': params,
+        'input': query,
     }
-    if 'ensemble' in params:
-        task_props['ensemble'] = params['ensemble']
+    if 'ensemble' in query:
+        task_props['ensemble'] = query['ensemble']
 
     if task_id is not None:
         task_props['_id'] = task_id
