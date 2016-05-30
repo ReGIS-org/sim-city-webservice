@@ -48,18 +48,7 @@ def get_minified_filename(path, name, extension='json'):
 
 # Error checking
 def get_simulation_config(name, version, path):
-    if '/' in name or '\\' in name:
-        abort(400, 'simulation name is malformed')
-
-    try:
-        filename = get_minified_filename(path, name)
-        with open(os.path.join(path, filename)) as f:
-            sim = json.load(f)
-    except IOError:
-        abort(404, 'simulation "{0}" not found'.format(name))
-    except ValueError:
-        abort(500, ('simulation "{0}" is not well configured on the server; '
-                    'contact the server administrator.').format(name))
+    sim = get_json(name, path)
     try:
         version = get_simulation_version(sim, version)
     except KeyError:
@@ -69,6 +58,7 @@ def get_simulation_config(name, version, path):
         abort(500, ('simulation "{0}" is not fully configured on the server; '
                     'contact the server administrator.').format(name))
     return sim, version
+
 
 def get_json(name, path):
     if '/' in name or '\\' in name:
@@ -84,6 +74,7 @@ def get_json(name, path):
         abort(500, ('schema "{0}" is not well configured on the server; '
                     'contact the server administrator.').format(name))
     return schema
+
 
 def get_simulation_version(sim_specs, target_version):
     if target_version is None:

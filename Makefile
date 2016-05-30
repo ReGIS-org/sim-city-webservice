@@ -3,7 +3,6 @@
 all: install
 
 requirements:
-	@pip install --upgrade Cython
 	@pip install -r requirements.txt
 
 test-requirements:

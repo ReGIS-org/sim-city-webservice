@@ -21,16 +21,13 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file)
 import simcity
 from simcity.util import listfiles
-from simcityweb import error, get_simulation_config, get_json
+from simcityweb import error, get_simulation_config
 import simcityexplore
 from couchdb.http import ResourceConflict
-from picas.documents import Document
 import os
 import json
 
 config_sim = simcity.get_config().section('Simulations')
-config_schema = simcity.get_config().section('Schemas')
-config_resources = simcity.get_config().section('Resources')
 couch_cfg = simcity.get_config().section('task-db')
 prefix = '/explore'
 
@@ -47,7 +44,7 @@ bottle.install(bottle.JSONPlugin(
 @get(prefix + '/simulate/<name>/<version>')
 def get_simulation_by_name_version(name, version=None):
     try:
-        sim, version = get_simulation_config(name, version, config_sim['path'])
+        sim, version = get_simulation_config(name, version, 'simulations')
         return sim[version]
     except HTTPResponse as ex:
         return ex
@@ -56,10 +53,11 @@ def get_simulation_by_name_version(name, version=None):
 @get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
-        sim, version = get_simulation_config(name, None, config_sim['path'])
+        sim, version = get_simulation_config(name, None, 'simulations')
         return sim
     except HTTPResponse as ex:
         return ex
+
 
 @get(prefix + '/')
 def root():
@@ -88,13 +86,14 @@ def get_doc_type(doctype):
 
 @get(prefix + '/simulate')
 def simulate_list():
-    files = listfiles(config_sim['path'])
+    files = listfiles('simulations')
     return {"simulations": [f[:-5] for f in files if f.endswith('.json')]}
+
 
 @post(prefix + '/simulate/<name>/<version>')
 def simulate_name_version(name, version=None):
     try:
-        sim, version = get_simulation_config(name, version, config_sim['path'])
+        sim, version = get_simulation_config(name, version, 'simulations')
         sim = sim[version]
 
         print("request: " + str(request))
@@ -146,31 +145,30 @@ def simulate_name_version(name, version=None):
 def simulate_name(name):
     return simulate_name_version(name)
 
+
 @get(prefix + '/schema')
 def schema_list():
-    files = listfiles(config_schema['path'])
+    files = listfiles('schemas')
     return {"schemas": [f[:-5] for f in files if f.endswith('.json')]}
+
 
 @get(prefix + '/schema/<name>')
 def schema_name(name):
-    try:
-        schema = get_json(name, config_schema['path'])
-        return schema
-    except HTTPResponse as ex:
-        return ex
+    return static_file(os.path.join('schemas', name + '.json'),
+                       root=project_dir)
+
 
 @get(prefix + '/resource')
 def resource_list():
-    files = listfiles(config_resources['path'])
+    files = listfiles('resources')
     return {"resources": [f[:-5] for f in files if f.endswith('.json')]}
+
 
 @get(prefix + '/resource/<name>')
 def resource_name(name):
-    try:
-        json = get_json(name, config_resources['path'])
-        return json
-    except HTTPResponse as ex:
-        return ex
+    return static_file(os.path.join('resources', name + '.json'),
+                       root=project_dir)
+
 
 @get(prefix + '/view/totals')
 def overview():
@@ -200,7 +198,7 @@ def submit_job():
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
-    sim, version = get_simulation_config(name, version, config_sim['path'])
+    sim, version = get_simulation_config(name, version, 'simulations')
     url = '/couchdb/' + couch_cfg['database']
     design_doc = simcityexplore.ensemble_view(
         simcity.get_task_database(), name, version, url, ensemble)
@@ -228,7 +226,7 @@ def del_simulation(id):
     if rev is None:
         return error(409, "revision not specified")
 
-    task = Document({'_id': id, '_rev': rev})
+    task = simcity.Document({'_id': id, '_rev': rev})
 
     try:
         simcity.get_task_database().delete(task)

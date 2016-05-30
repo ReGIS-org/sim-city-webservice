@@ -16,8 +16,12 @@
 
 import os
 
+try:
+    input = raw_input
+except NameError:
+    pass
 
-_input_mechanism=raw_input
+_input_mechanism = input
 
 
 def confirm(message, default_response=True):

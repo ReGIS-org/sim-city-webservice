@@ -19,6 +19,5 @@ host = myhostname
 method = ssh
 
 [Simulations]
-path = simulations
 max_jobs = 4
 default_host = mycluster
