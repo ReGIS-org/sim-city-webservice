@@ -95,9 +95,6 @@ def simulate_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, 'simulations')
         sim = sim[version]
-
-        print("request: " + str(request))
-
         query = dict(request.json)
         task_id = None
         if '_id' in query:
