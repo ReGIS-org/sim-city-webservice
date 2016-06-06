@@ -156,21 +156,23 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
+                        "examples": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
                         "examples": {
                             "application/json": {
-                                "simulations": [
-                                    "sim1",
-                                    "sim2"
-                                ]
+                                "error": "simulation malconfigured on server"
                             }
                         },
                         "schema": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "type": "object",
                             "properties": {
-                                "simulations": {
-                                    "type": "array",
-                                    "description": "simulation names"
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
                                 }
                             }
                         }
@@ -192,36 +194,11 @@
                         "headers": {},
                         "examples": {
                             "application/json": {
-                                "latest": "0.3",
-                                "stable": "0.3",
-                                "0.3": {
-                                    "command": "path/to/sim-city-client/simulation.py",
-                                    "parameters": [
-                                        {
-                                            "name": "model",
-                                            "type": "choice",
-                                            "choices": [
-                                                "type1",
-                                                "type2"
-                                            ],
-                                            "default": "type1",
-                                            "description": "model instance to run"
-                                        },
-                                        {
-                                            "name": "name",
-                                            "type": "str",
-                                            "min_length": 3,
-                                            "max_length": 32
-                                        },
-                                        {
-                                            "name": "simitems",
-                                            "type": "number",
-                                            "min": 0,
-                                            "max": 100,
-                                            "dtype": "float"
-                                        }
-                                    ]
-                                }
+                                "name": "simulation1",
+                                "versions": [
+                                    "0.1",
+                                    "latest"
+                                ]
                             }
                         }
                     },
@@ -307,6 +284,8 @@
                         "headers": {},
                         "examples": {
                             "application/json": {
+                                "name": "simulation1",
+                                "version": "0.01",
                                 "command": "path/to/sim-city-client/simulation.py",
                                 "parameters": [
                                     {
@@ -513,7 +492,51 @@
                     "200": {
                         "description": "OK",
                         "headers": {},
-                        "examples": {},
+                        "examples": {
+                            "application/json": {
+                                "_id": "task_12345",
+                                "_rev": "3-abcdef",
+                                "name": "sim1",
+                                "output": {},
+                                "lock": 1439388534,
+                                "hostname": "myhost.example.com",
+                                "scrub_count": 0,
+                                "version": "0.3",
+                                "command": "~/path/to/command.py",
+                                "uploads": {
+                                    "file1.json": "http://webdav.example.com/sim1/file1.json"
+                                },
+                                "execute_properties": {
+                                    "dirs": {
+                                        "tmp": "/scratch/local/task_12345",
+                                        "input": "/home/me/sim1/input/task_12345",
+                                        "output": "/home/me/sim1/output/task_12345"
+                                    },
+                                    "input_file": "/home/me/sim1/input/task_12345/input.json"
+                                },
+                                "error": [],
+                                "done": 1439390617,
+                                "type": "task",
+                                "ensemble": "myensemble",
+                                "input": {
+                                    "param1": 21,
+                                    "locations1": {
+                                        "id": "Netherlands eScience Center",
+                                        "x": "52.356923",
+                                        "y": "4.954268"
+                                    }
+                                },
+                                "_attachments": {
+                                    "file2.json": {
+                                        "content_type": "application/json",
+                                        "revpos": 3,
+                                        "digest": "md5-mYQqQM/2nHpccWNnvwqI8g==",
+                                        "length": 515418,
+                                        "stub": true
+                                    }
+                                }
+                            }
+                        },
                         "schema": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "type": "object",
@@ -562,7 +585,7 @@
                                             "description": "URL of file"
                                         }
                                     },
-                                    "description": "output files, filename and URL"
+                                    "description": "uploaded files, filename and URL"
                                 },
                                 "input": {
                                     "type": "object",

@@ -41,24 +41,6 @@ bottle.install(bottle.JSONPlugin(
     json_dumps=lambda x: json.dumps(x, separators=(',', ':'))))
 
 
-@get(prefix + '/simulate/<name>/<version>')
-def get_simulation_by_name_version(name, version=None):
-    try:
-        sim, version = get_simulation_config(name, version, 'simulations')
-        return sim[version]
-    except HTTPResponse as ex:
-        return ex
-
-
-@get(prefix + '/simulate/<name>')
-def get_simulation_by_name(name):
-    try:
-        sim, version = get_simulation_config(name, None, 'simulations')
-        return sim
-    except HTTPResponse as ex:
-        return ex
-
-
 @get(prefix + '/')
 def root():
     return get_doc_type('swagger')
@@ -86,8 +68,45 @@ def get_doc_type(doctype):
 
 @get(prefix + '/simulate')
 def simulate_list():
-    files = listfiles('simulations')
-    return {"simulations": [f[:-5] for f in files if f.endswith('.json')]}
+    simulations = {}
+    try:
+        for f in listfiles('simulations'):
+            if not f.endswith('.json'):
+                continue
+
+            name = f[:-5]
+            conf = get_simulation_config(name, None, 'simulations')[0]
+            simulations[name] = {'name': name, 'versions': list(conf.keys())}
+
+        return simulations
+    except HTTPResponse as ex:
+        return ex
+
+
+@get(prefix + '/simulate/<name>')
+def get_simulation_by_name(name):
+    try:
+        sim, version = get_simulation_config(name, None, 'simulations')
+        return {'name': name, 'versions': list(sim.keys())}
+    except HTTPResponse as ex:
+        return ex
+
+
+@get(prefix + '/simulate/<name>/<version>')
+def get_simulation_by_name_version(name, version=None):
+    try:
+        sim, version = get_simulation_config(name, version, 'simulations')
+        chosen_sim = sim[version]
+        chosen_sim['name'] = name
+        chosen_sim['version'] = version
+        return chosen_sim
+    except HTTPResponse as ex:
+        return ex
+
+
+@post(prefix + '/simulate/<name>')
+def simulate_name(name):
+    return simulate_name_version(name)
 
 
 @post(prefix + '/simulate/<name>/<version>')
@@ -138,15 +157,10 @@ def simulate_name_version(name, version=None):
     return token.value
 
 
-@post(prefix + '/simulate/<name>')
-def simulate_name(name):
-    return simulate_name_version(name)
-
-
 @get(prefix + '/schema')
 def schema_list():
     files = listfiles('schemas')
-    return {"schemas": [f[:-5] for f in files if f.endswith('.json')]}
+    return {'schemas': [f[:-5] for f in files if f.endswith('.json')]}
 
 
 @get(prefix + '/schema/<name>')

@@ -60,8 +60,16 @@ Retrieve hosts configured under the webservice with basic (optional) metadata.
 Get the names of the simulation engines configured in the webservice.
 
 + Response 200 (application/json)
+    + Body
+
+            {
+                "simulation1": {"name": "simulation1", "versions": ["0.1", "latest"]},
+                "simulation2": {"name": "simulation1", "versions": ["0.1", "1.0", ""latest", "stable"]}
+            }
+
++ Response 500 (application/json)
     + Attributes
-        + simulations: sim1, sim2 (array[string]) - simulation names
+        + error: simulation malconfigured on server (string) - error message
 
 ## Simulation engine versions [GET /simulate/{name}]
 Get the versions of a simulation engine and their configurations.
@@ -73,33 +81,8 @@ Get the versions of a simulation engine and their configurations.
     + Body
 
             {
-                "latest": "0.3",
-                "stable": "0.3",
-                "0.3": {
-                    "command": "path/to/sim-city-client/simulation.py",
-                    "parameters": [
-                        {
-                            "name": "model",
-                            "type": "choice",
-                            "choices": ["type1", "type2"],
-                            "default": "type1",
-                            "description": "model instance to run"
-                        },
-                        {
-                            "name": "name",
-                            "type": "str",
-                            "min_length": 3,
-                            "max_length": 32
-                        },
-                        {
-                            "name": "simitems",
-                            "type": "number",
-                            "min": 0,
-                            "max": 100,
-                            "dtype": "float"
-                        }
-                    ]
-                }
+                "name": "simulation1",
+                "versions": ["0.1", "latest"]
             }
 
 + Response 400 (application/json)
@@ -130,6 +113,8 @@ engine.
     + Body
 
             {
+                "name": "simulation1",
+                "version": "0.01",
                 "command": "path/to/sim-city-client/simulation.py",
                 "parameters": [
                     {
@@ -207,10 +192,10 @@ the simulation engine should be provided in the request.
         + command: `my/path/to/command.py` (string) - command that will run the simulation
         + lock: 1439388534 (number) - time in seconds that computation on the task started (0 if none, -1 if error)
         + done: 1439390617 (number) - time in seconds that computation on the task finished (0 if none, -1 if error)
-        + uploads (object) - output files, filename and URL
+        + uploads (object) - uploaded files, filename and URL
             + `some_filename`: http://mydav/path/file1.json (string) - URL of file
-        + input: `"param1": 42` (object) - input parameters for the simulation.
-        + output: `"value1": 21` (object) - output value from the simulation.
+        + input (object) - input parameters for the simulation.
+        + output (object) - output value from the simulation.
         + `_attachments` (object) - files attached to the couchdb document.
             + `some_filename` (object)
                 + content_type: application/json (string) - content type of attachment
@@ -233,7 +218,7 @@ the simulation engine should be provided in the request.
                 "command": "~/path/to/command.py",
                 "uploads": {
                     "file1.json": "http://webdav.example.com/sim1/file1.json"
-                }
+                },
                 "execute_properties": {
                     "dirs": {
                         "tmp": "/scratch/local/task_12345",

@@ -84,7 +84,7 @@ def get_simulation_version(sim_specs, target_version):
         target_version = sim_specs[target_version]
 
     if (target_version not in sim_specs or
-        not isinstance(sim_specs[target_version], dict)):
+            not isinstance(sim_specs[target_version], dict)):
         raise ValueError
 
     return target_version
