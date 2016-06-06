@@ -18,7 +18,7 @@ from gevent import monkey; monkey.patch_all()
 
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
-                    static_file)
+                    static_file, hook)
 import simcity
 from simcity.util import listfiles
 from simcityweb import error, get_simulation_config
@@ -40,8 +40,11 @@ bottle.uninstall('json')
 bottle.install(bottle.JSONPlugin(
     json_dumps=lambda x: json.dumps(x, separators=(',', ':'))))
 
+@hook('before_request')
+def strip_path():
+    request.environ['PATH_INFO'] = request.environ['PATH_INFO'].rstrip('/')
 
-@get(prefix + '/')
+@get(prefix)
 def root():
     return get_doc_type('swagger')
 
