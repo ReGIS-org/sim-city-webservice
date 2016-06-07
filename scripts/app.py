@@ -71,7 +71,7 @@ def simulate_list():
     simulations = {}
     try:
         for f in listfiles('simulations'):
-            if not f.endswith('.json'):
+            if not f.endswith('.json') or f.endswith('.min.json'):
                 continue
 
             name = f[:-5]
