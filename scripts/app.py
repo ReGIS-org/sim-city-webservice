@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey;
+
+from simcityweb.util import get_simulation_versions
+
+monkey.patch_all()
 
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
@@ -78,8 +82,10 @@ def simulate_list():
                 continue
 
             name = f[:-5]
-            conf = get_simulation_config(name, None, 'simulations')[0]
-            simulations[name] = {'name': name, 'versions': list(conf.keys())}
+            simulations[name] = {
+                'name': name,
+                'versions': get_simulation_versions(name)
+            }
 
         return simulations
     except HTTPResponse as ex:
@@ -89,8 +95,7 @@ def simulate_list():
 @get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
-        sim, version = get_simulation_config(name, None, 'simulations')
-        return {'name': name, 'versions': list(sim.keys())}
+        return {'name': name, 'versions': get_simulation_versions(name)}
     except HTTPResponse as ex:
         return ex
 

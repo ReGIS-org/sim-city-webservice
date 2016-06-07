@@ -17,6 +17,7 @@
 from bottle import HTTPResponse
 import os
 import json
+from pkg_resources import parse_version
 
 
 def make_hash(*args):
@@ -88,3 +89,9 @@ def get_simulation_version(sim_specs, target_version):
         raise ValueError
 
     return target_version
+
+
+def get_simulation_versions(name):
+    sim = get_simulation_config(name, None, 'simulations')[0]
+    sorted_versions = sorted([parse_version(v) for v in sim.keys()])
+    return [str(version) for version in sorted_versions]
