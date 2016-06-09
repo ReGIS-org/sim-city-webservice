@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gevent import monkey;
+from gevent import monkey
 
 from simcityweb.util import get_simulation_versions
 
@@ -26,7 +26,6 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
 import simcity
 from simcity.util import listfiles
 from simcityweb import error, get_simulation_config
-import simcityexplore
 from couchdb.http import ResourceConflict
 import os
 import json
@@ -128,11 +127,11 @@ def simulate_name_version(name, version=None):
             task_id = query['_id']
             del query['_id']
 
-        simcityexplore.parse_parameters(query, sim['properties'])
+        simcity.parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
-        return error(400, ex.message)
+        return error(400, ex)
     except EnvironmentError as ex:
         return error(500, ex.message)
 
@@ -217,12 +216,14 @@ def submit_job():
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
-    sim, version = get_simulation_config(name, version, 'simulations')
-    url = '/couchdb/' + couch_cfg['database']
-    design_doc = simcityexplore.ensemble_view(
-        simcity.get_task_database(), name, version, url, ensemble)
+    version = get_simulation_config(name, version, 'simulations')[1]
+    db = simcity.get_task_database()
+    design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 
-    location = '{0}/_design/{1}/_view/all_docs'.format(url, design_doc)
+    url = db.url
+    if not url.endswith('/'):
+        url += '/'
+    location = '{0}_design/{1}/_view/all_docs'.format(url, design_doc)
 
     response.status = 302  # temporary redirect
     response.set_header('Location', location)
