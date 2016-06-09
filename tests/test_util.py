@@ -69,8 +69,11 @@ def test_minified_filename():
 
 
 def test_minified_non_exist():
-    assert_raises(FileNotFoundError, get_minified_json, "dir",
-                  "does not exist")
+    try:
+        assert_raises(FileNotFoundError, get_minified_json, "dir",
+                      "does not exist")
+    except NameError:
+        assert_raises(IOError, get_minified_json, "dir", "does not exist")
 
 
 def test_get_simulation_version():

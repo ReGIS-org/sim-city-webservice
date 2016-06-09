@@ -19,6 +19,11 @@ import os
 import json
 from pkg_resources import parse_version
 
+try:
+    FileNotFound = FileNotFoundError
+except NameError:
+    FileNotFound = IOError
+
 
 def make_hash(*args):
     value = 0x345678
@@ -41,7 +46,7 @@ def get_minified_json(path, name):
     try:
         with open(os.path.join(path, name + '.min.json')) as f:
             return json.load(f)
-    except FileNotFoundError:
+    except FileNotFound:
         with open(os.path.join(path, name + '.json')) as f:
             data = json.load(f)
 
@@ -75,7 +80,7 @@ def get_json(name, path, json_type):
 
     try:
         return get_minified_json(path, name)
-    except FileNotFoundError:
+    except FileNotFound:
         abort(404, '{1} "{0}" not found'.format(name, json_type))
     except IOError:
         abort(500, 'failed to read {1} "{0}"'.format(name, json_type))
