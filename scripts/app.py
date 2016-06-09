@@ -138,11 +138,15 @@ def simulate_name_version(name, version=None):
     task_props = {
         'name': name,
         'command': sim['command'],
+        'arguments': sim.get('arguments', []),
+        'parallelism': sim.get('parallelism', '*'),
         'version': version,
         'input': query,
     }
     if 'ensemble' in query:
         task_props['ensemble'] = query['ensemble']
+    if 'simulation' in query:
+        task_props['simulation'] = query['simulation']
 
     if task_id is not None:
         task_props['_id'] = task_id
