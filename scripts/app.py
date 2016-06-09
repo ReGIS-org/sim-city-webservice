@@ -14,17 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gevent import monkey
-
-from simcityweb.util import get_simulation_versions
-
-monkey.patch_all()
+from gevent import monkey; monkey.patch_all()
 
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
 from simcity.util import listfiles
+from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
 from couchdb.http import ResourceConflict
 import os
@@ -58,18 +55,17 @@ def get_doc():
     return get_doc_type(doc_format)
 
 
-def get_doc_type(doctype):
+def get_doc_type(doc_type):
     docs = {
         'html': 'apiary.html',
         'swagger': 'swagger.json',
         'api-blueprint': 'apiary.apib'
     }
-    if doctype not in docs:
-        return error(409,
-            "documentation {0} not found. choose between {1}"
-            .format(doctype, docs.keys()))
+    if doc_type not in docs:
+        return error(409, "documentation {0} not found. choose between {1}"
+                     .format(doc_type, docs.keys()))
 
-    return static_file(os.path.join('docs', docs[doctype]), root=project_dir)
+    return static_file(os.path.join('docs', docs[doc_type]), root=project_dir)
 
 
 @get(prefix + '/simulate')
