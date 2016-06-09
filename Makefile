@@ -1,4 +1,4 @@
-.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve check-couchdb-env docker docker-run docker-osmium docker-couchdb docker-base docs minify
+.PHONY: all requirements test-requirements test clean pyflakes pyflakes-exists unittest unittest-coverage fulltest install reinstall serve check-couchdb-env docker docker-run docker-osmium docker-couchdb docker-base docs
 
 all: install
 
@@ -8,7 +8,7 @@ requirements:
 test-requirements:
 	@pip install -r test_requirements.txt > /dev/null
 
-install: requirements minify
+install: requirements
 	@pip install .
 
 reinstall:
@@ -40,7 +40,7 @@ clean:
 serve-dev:
 	python -m bottle scripts.app --debug --reload --bind localhost:9090 -s gevent
 
-serve: minify
+serve:
 	python -m bottle scripts.app --bind localhost:9090 -s gevent
 
 COUCHDB_CONFIG = docker/couchdb/local.ini couchdb.env
@@ -81,16 +81,3 @@ docker-clean:
 docs: docs/apiary.apib
 	aglio -i docs/apiary.apib -o docs/apiary.html
 	apib2swagger -i docs/apiary.apib -o docs/swagger.json
-
-SIMULATIONS = simulations/matsim.json simulations/transims-us101.json
-SCHEMAS = schemas/point2d.json
-JSON_MINIFY = json-minify
-JSON_MINIFY_INSTALL = install json-minify with npm install -g json-minify
-
-minify: $(patsubst %.json, %.min.json, $(SIMULATIONS) $(SCHEMAS))
-
-# Only write to minified file if json-minify exists
-# See http://stackoverflow.com/questions/592620/check-if-a-program-exists-from-a-bash-script
-%.min.json: %.json
-	@echo "$(JSON_MINIFY) $< > $@"
-	@sh -c "if command -v $(JSON_MINIFY) >/dev/null; then if $(JSON_MINIFY) $< > $@.tmp; then mv $@.tmp $@; else rm $@.tmp; exit 1; fi; else echo 'WARNING: $(JSON_MINIFY_INSTALL)'; fi"
