@@ -160,7 +160,8 @@
             "items": {
                 "$ref": "http://localhost/explore/schema/point2d"
             },
-            "description": "Please add one or more fire stations to the map"
+            "description": "Please add one or more fire stations to the map",
+            "validationMessage": "Please add at least one fire station"
         },
         "fires": {
             "title": "Fire",
@@ -170,7 +171,8 @@
             "items": {
                 "$ref": "http://localhost/explore/schema/point2d"
             },
-            "description": "Please add exactly one (1) fire to the map"
+            "description": "The fire",
+            "validationMessage": "Please add exactly one (1) fire to the map"
         }
     }
   }
