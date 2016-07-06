@@ -14,7 +14,8 @@
                 "iconHeight": 30,
                 "strokeColor": "#ffffff"
             },
-            "propertyTypeKeys": "title,notes"
+            "propertyTypeKeys": "Name,geometry",
+            "u": "bower_components/csweb/dist-bower/images/marker.png"
         },
         "Fire": {
             "id": "SimCity#fire",
@@ -28,9 +29,27 @@
                 "iconHeight": 30,
                 "strokeColor": "#ffffff"
             },
-            "propertyTypeKeys": "title,notes"
+            "propertyTypeKeys": "Name,geometry",
+            "u": "bower_components/csweb/dist-bower/images/marker.png"
         }
     },
-    "propertyTypeData": {},
+    "propertyTypeData": {
+        "Name": {
+            "label": "Name",
+            "type": "text",
+            "title": "Name",
+            "visibleInCallOut": true,
+            "canEdit": true,
+            "isSearchable": true
+        },
+        "geometry": {
+            "label": "Geometry",
+            "type": "text",
+            "title": "Geometry",
+            "visibleInCallOut": true,
+            "canEdit": false,
+            "isSearcahble": false
+        }
+    },
     "isDynamic": false
 }
