@@ -21,8 +21,8 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
 from simcity.util import listfiles
+from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
-import simcityexplore
 from couchdb.http import ResourceConflict
 import os
 import json
@@ -55,18 +55,17 @@ def get_doc():
     return get_doc_type(doc_format)
 
 
-def get_doc_type(doctype):
+def get_doc_type(doc_type):
     docs = {
         'html': 'apiary.html',
         'swagger': 'swagger.json',
         'api-blueprint': 'apiary.apib'
     }
-    if doctype not in docs:
-        return error(409,
-            "documentation {0} not found. choose between {1}"
-            .format(doctype, docs.keys()))
+    if doc_type not in docs:
+        return error(409, "documentation {0} not found. choose between {1}"
+                     .format(doc_type, docs.keys()))
 
-    return static_file(os.path.join('docs', docs[doctype]), root=project_dir)
+    return static_file(os.path.join('docs', docs[doc_type]), root=project_dir)
 
 
 @get(prefix + '/simulate')
@@ -74,12 +73,14 @@ def simulate_list():
     simulations = {}
     try:
         for f in listfiles('simulations'):
-            if not f.endswith('.json'):
+            if not f.endswith('.json') or f.endswith('.min.json'):
                 continue
 
             name = f[:-5]
-            conf = get_simulation_config(name, None, 'simulations')[0]
-            simulations[name] = {'name': name, 'versions': list(conf.keys())}
+            simulations[name] = {
+                'name': name,
+                'versions': get_simulation_versions(name)
+            }
 
         return simulations
     except HTTPResponse as ex:
@@ -89,8 +90,7 @@ def simulate_list():
 @get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
-        sim, version = get_simulation_config(name, None, 'simulations')
-        return {'name': name, 'versions': list(sim.keys())}
+        return {'name': name, 'versions': get_simulation_versions(name)}
     except HTTPResponse as ex:
         return ex
 
@@ -123,22 +123,26 @@ def simulate_name_version(name, version=None):
             task_id = query['_id']
             del query['_id']
 
-        simcityexplore.parse_parameters(query, sim['properties'])
+        simcity.parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
-        return error(400, ex.message)
+        return error(400, ex)
     except EnvironmentError as ex:
         return error(500, ex.message)
 
     task_props = {
         'name': name,
         'command': sim['command'],
+        'arguments': sim.get('arguments', []),
+        'parallelism': sim.get('parallelism', '*'),
         'version': version,
         'input': query,
     }
     if 'ensemble' in query:
         task_props['ensemble'] = query['ensemble']
+    if 'simulation' in query:
+        task_props['simulation'] = query['simulation']
 
     if task_id is not None:
         task_props['_id'] = task_id
@@ -212,12 +216,14 @@ def submit_job():
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
-    sim, version = get_simulation_config(name, version, 'simulations')
-    url = '/couchdb/' + couch_cfg['database']
-    design_doc = simcityexplore.ensemble_view(
-        simcity.get_task_database(), name, version, url, ensemble)
+    version = get_simulation_config(name, version, 'simulations')[1]
+    db = simcity.get_task_database()
+    design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 
-    location = '{0}/_design/{1}/_view/all_docs'.format(url, design_doc)
+    url = db.url
+    if not url.endswith('/'):
+        url += '/'
+    location = '{0}_design/{1}/_view/all_docs'.format(url, design_doc)
 
     response.status = 302  # temporary redirect
     response.set_header('Location', location)

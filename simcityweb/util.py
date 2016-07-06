@@ -17,6 +17,12 @@
 from bottle import HTTPResponse
 import os
 import json
+from pkg_resources import parse_version
+
+try:
+    FileNotFound = FileNotFoundError
+except NameError:
+    FileNotFound = IOError
 
 
 def make_hash(*args):
@@ -36,19 +42,27 @@ def abort(status, message):
     raise error(status, message)
 
 
-def get_minified_filename(path, name, extension='json'):
-    if os.path.exists(os.path.join(path, name + '.min.' + extension)):
-        return name + '.min.' + extension
-    elif os.path.exists(os.path.join(path, name + '.' + extension)):
-        return name + '.' + extension
+def get_minified_json(path, name):
+    try:
+        with open(os.path.join(path, name + '.min.json')) as f:
+            return json.load(f)
+    except FileNotFound:
+        with open(os.path.join(path, name + '.json')) as f:
+            data = json.load(f)
 
-    raise IOError('File {0}/{1}(.min).{2} does not exist'
-                  .format(path, name, extension))
+        try:
+            with open(os.path.join(path, name + '.min.json'), 'w') as f:
+                json.dump(data, f, separators=(',', ':'))
+        except IOError:
+            print('WARNING: cannot write minified json file {0}/{1}.min.json'
+                  .format(path, name))
+
+        return data
 
 
 # Error checking
 def get_simulation_config(name, version, path):
-    sim = get_json(name, path)
+    sim = get_json(name, path, 'simulation')
     try:
         version = get_simulation_version(sim, version)
     except KeyError:
@@ -60,20 +74,19 @@ def get_simulation_config(name, version, path):
     return sim, version
 
 
-def get_json(name, path):
+def get_json(name, path, json_type):
     if '/' in name or '\\' in name:
-        abort(400, 'schema name is malformed')
+        abort(400, json_type + ' name is malformed')
 
     try:
-        filename = get_minified_filename(path, name)
-        with open(os.path.join(path, filename)) as f:
-            schema = json.load(f)
+        return get_minified_json(path, name)
+    except FileNotFound:
+        abort(404, '{1} "{0}" not found'.format(name, json_type))
     except IOError:
-        abort(404, 'schema "{0}" not found'.format(name))
+        abort(500, 'failed to read {1} "{0}"'.format(name, json_type))
     except ValueError:
-        abort(500, ('schema "{0}" is not well configured on the server; '
-                    'contact the server administrator.').format(name))
-    return schema
+        abort(500, ('{1} "{0}" is not well configured on the server; contact '
+                    'the server administrator.').format(name, json_type))
 
 
 def get_simulation_version(sim_specs, target_version):
@@ -88,3 +101,9 @@ def get_simulation_version(sim_specs, target_version):
         raise ValueError
 
     return target_version
+
+
+def get_simulation_versions(name):
+    sim = get_simulation_config(name, None, 'simulations')[0]
+    sorted_versions = sorted([parse_version(v) for v in sim.keys()])
+    return [str(version) for version in sorted_versions]

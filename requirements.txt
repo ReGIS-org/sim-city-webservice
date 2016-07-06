@@ -8,4 +8,3 @@ pyxenon==0.2.1
 pystache==0.5.4
 requests==2.8.1
 -e git+https://github.com/indodutch/sim-city-client.git@develop#egg=simcity-0.3.4
--e git+https://github.com/indodutch/sim-city-explore.git@json-schema#egg=simcityexplore-0.1

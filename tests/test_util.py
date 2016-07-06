@@ -17,9 +17,10 @@
 from __future__ import print_function
 
 from simcityweb.util import (make_hash, error, abort, get_simulation_config,
-                             get_minified_filename, get_simulation_version)
+                             get_minified_json, get_simulation_version)
 from bottle import HTTPResponse
-from nose.tools import (assert_equals, assert_raises, assert_not_equal)
+from nose.tools import (assert_equals, assert_raises, assert_not_equal,
+                        assert_true)
 import tempfile
 import os
 
@@ -47,25 +48,32 @@ def test_abort():
 def test_minified_filename():
     fd, path = tempfile.mkstemp(suffix='.json')
     try:
+        with open(path, 'wb') as f:
+            f.write(b'{"a": 2}')
+
         # if minified does not exist, return full file
         filedir, filename = os.path.split(path)
         base = filename[:-5]
-        assert_equals(filename, get_minified_filename(filedir, base))
-
-        # otherwise, return minified
         minfilename = base + '.min.json'
-        with open(os.path.join(filedir, minfilename), 'w'):
-            pass
+        minpath = os.path.join(filedir, minfilename)
+
+        assert_equals({'a': 2}, get_minified_json(filedir, base))
+
+        assert_true(os.path.exists(minpath))
         try:
-            assert_equals(minfilename, get_minified_filename(filedir, base))
+            assert_equals(os.stat(minpath).st_size, os.stat(path).st_size - 1)
         finally:
-            os.remove(os.path.join(filedir, minfilename))
+            os.remove(minpath)
     finally:
         os.remove(path)
 
 
 def test_minified_non_exist():
-    assert_raises(IOError, get_minified_filename, "dir", "does not exist")
+    try:
+        assert_raises(FileNotFoundError, get_minified_json, "dir",
+                      "does not exist")
+    except NameError:
+        assert_raises(IOError, get_minified_json, "dir", "does not exist")
 
 
 def test_get_simulation_version():
