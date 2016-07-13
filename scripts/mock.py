@@ -39,24 +39,58 @@ config_sim = simcity.get_config().section('Simulations')
 # Mock database using a dictionary
 mock_db = dict()
 
+# Helper function to convert UTF-8 json string
+# into python compatible data strings
+def byteify(input):
+    if isinstance(input, dict):
+        return {byteify(key): byteify(value)
+                for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
+
+
+# Load a json file with premade test tasks
+def load_pre_made_tasks():
+    for root, dirs, files in os.walk('mock_tasks', topdown=False):
+        for name in files:
+            if name.endswith('.json'):
+                filename = os.path.join(root, name)
+                with open(filename) as file:
+                    task = byteify(json.load(file))
+
+                    mock_db[task['_id']] = task
+
+# WARNING:
+# Loading the json file in this manner probably means
+# it is loaded for every request so we shouldn't make too many
+load_pre_made_tasks()
+
 # Remove spaces from json output
 bottle.uninstall('json')
 bottle.install(bottle.JSONPlugin(
     json_dumps=lambda x: json.dumps(x, separators=(',', ':'))))
+
 
 # Remove trailing / from request
 @hook('before_request')
 def strip_path():
     request.environ['PATH_INFO'] = request.environ['PATH_INFO'].rstrip('/')
 
+
 @get(prefix)
 def root():
     return get_doc_type('swagger')
+
 
 @get(prefix + '/doc')
 def get_doc():
     doc_format = request.query.get('format', 'html')
     return get_doc_type(doc_format)
+
 
 @get(prefix + '/doc')
 def get_doc():
@@ -148,7 +182,6 @@ def simulate_name_version(name, version=None):
     except EnvironmentError as ex:
         return error(500, ex.message)
 
-    print "Adding query as input: ", query
     # Create the response we would normally get from
     # the database
     task_props = {
@@ -184,7 +217,6 @@ def simulate_name_version(name, version=None):
 
     # Add the new task to the "database"
     mock_db[task_id] = task_props
-    #print("Mock db is now: ", len(mock_db))
 
     response.status = 201  # created
 
@@ -246,7 +278,6 @@ def mock_overview_total():
 def submit_job():
     if not hasattr(submit_job, 'batch_id'):
         submit_job.batch_id = 1
-
 
     # Mock the response for submitting the job
     host = config_sim['default_host']
