@@ -23,7 +23,8 @@ import simcity
 from simcity.util import listfiles
 from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
-from couchdb.http import ResourceConflict
+from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
+                          PreconditionFailed, ServerError)
 import os
 import json
 
@@ -251,8 +252,16 @@ def del_simulation(id):
     try:
         simcity.get_task_database().delete(task)
         return {'ok': True}
+    except Unauthorized:
+        return error(401, "unauthorized")
+    except ResourceNotFound:
+        return error(404, "document not found")
     except ResourceConflict:
         return error(409, "resource conflict")
+    except PreconditionFailed:
+        return error(412, "precondition failed")
+    except ServerError:
+        return error(502, "CouchDB connection failed")
 
 
 @get(prefix + '/hosts')
