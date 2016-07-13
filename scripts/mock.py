@@ -27,6 +27,7 @@ from simcityweb import error, get_simulation_config
 from uuid import uuid4
 import os
 import json
+import sys
 
 prefix = '/explore'
 
@@ -39,28 +40,31 @@ config_sim = simcity.get_config().section('Simulations')
 # Mock database using a dictionary
 mock_db = dict()
 
+
 # Helper function to convert UTF-8 json string
 # into python compatible data strings
-def byteify(input):
-    if isinstance(input, dict):
-        return {byteify(key): byteify(value)
-                for key, value in input.iteritems()}
-    elif isinstance(input, list):
-        return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
-        return input.encode('utf-8')
+def convert_to_bytes(_input):
+    if isinstance(_input, dict):
+        return {convert_to_bytes(key): convert_to_bytes(value)
+                for key, value in _input.items()}
+    elif isinstance(_input, list):
+        return [convert_to_bytes(element) for element in _input]
+    elif isinstance(_input, unicode):
+        return _input.encode('utf-8')
     else:
-        return input
+        return _input
 
 
-# Load a json file with premade test tasks
+# Load a json file with pre made test tasks
 def load_pre_made_tasks():
-    for root, dirs, files in os.walk('mock_tasks', topdown=False):
+    for _root, dirs, files in os.walk('mock_tasks', topdown=False):
         for name in files:
             if name.endswith('.json'):
-                filename = os.path.join(root, name)
-                with open(filename) as file:
-                    task = byteify(json.load(file))
+                filename = os.path.join(_root, name)
+                with open(filename) as _file:
+                    task = json.load(_file)
+                    if sys.version_info[0] == 2:
+                        task = convert_to_bytes(task)
 
                     mock_db[task['_id']] = task
 
@@ -266,7 +270,7 @@ def mock_overview_total():
 
     num = dict((view, 0) for view in views)
 
-    for key, task in mock_db.iteritems():
+    for key, task in mock_db.items():
         for view in views:
             if view in task['value'] and task['value'][view] == 1:
                 num[view] += 1
@@ -303,7 +307,7 @@ def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
     version = get_simulation_config(name, version, 'simulations')[1]
 
-    simulations = [task for k, task in mock_db.iteritems() if
+    simulations = [task for k, task in mock_db.items() if
                    task['value']['name'] == name and
                    task['value']['version'] == version and
                    (ensemble is None or task['value']['ensemble'] == ensemble)]
