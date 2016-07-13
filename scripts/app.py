@@ -41,9 +41,11 @@ bottle.uninstall('json')
 bottle.install(bottle.JSONPlugin(
     json_dumps=lambda x: json.dumps(x, separators=(',', ':'))))
 
+
 @hook('before_request')
 def strip_path():
     request.environ['PATH_INFO'] = request.environ['PATH_INFO'].rstrip('/')
+
 
 @get(prefix)
 def root():
