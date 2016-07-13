@@ -234,9 +234,30 @@ def simulations_view(name, version):
 @get(prefix + '/simulation/<id>')
 def get_simulation(id):
     try:
-        return simcity.get_task_database().get(id).value
+        return simcity.get_task_database().get(id)
     except ValueError:
         return error(404, "simulation does not exist")
+
+
+@get(prefix + '/simulation/<id>/<attachment>')
+def get_attachment(id, attachment):
+    db = simcity.get_task_database()
+    try:
+        task = db.get(id)
+    except ValueError:
+        return error(404, "simulation does not exist")
+
+    if attachment in task.attachments:
+        url = db.url.rstrip('/')
+
+        response.status = 302  # temporary redirect
+        response.set_header('Location',
+                            '{0}/{1}/{2}'.format(url, id, attachment))
+    elif attachment in task.uploads:
+        response.status = 302  # temporary redirect
+        response.set_header('Location', task.uploads[attachment])
+    else:
+        return error(404, "attachment not found")
 
 
 @delete(prefix + '/simulation/<id>')
