@@ -28,6 +28,8 @@ from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
 import os
 import json
 
+simcity.init(None)
+
 config_sim = simcity.get_config().section('Simulations')
 couch_cfg = simcity.get_config().section('task-db')
 prefix = '/explore'

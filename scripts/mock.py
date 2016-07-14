@@ -21,8 +21,6 @@ import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
-from simcity.util import listfiles
-from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
 from uuid import uuid4
 import os
@@ -30,6 +28,22 @@ import json
 import sys
 
 prefix = '/explore'
+
+
+config = simcity.Config()
+config.add_section('task-db', {})
+config.add_section('Simulations', {
+    'max_jobs': 1,
+    'path': 'simulations'
+})
+config.add_section('Schemas', {
+    'path': 'schemas'
+})
+config.add_section('Resources', {
+    'path': 'resources'
+})
+
+simcity.init(config)
 
 # Get project directory
 file_dir = os.path.dirname(os.path.realpath(__file__))
