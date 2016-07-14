@@ -1,11 +1,11 @@
 {
-  "id": "mock_added_task_1",
-  "key": "mock_added_task_1",
+  "id": "mock_added_task_4",
+  "key": "mock_added_task_4",
   "value": {
-    "_id": "mock_added_task_1",
-    "_rev": "9bd09b69824a40429fa7430c6688b608",
+    "_id": "mock_added_task_4",
+    "_rev": "dbd09b69824a40429fa7430c6688b608",
     "uploads": {},
-    "lock": 0,
+    "lock": 1468497000,
     "done": 0,
     "name": "matsim",
     "version": "0.5",
@@ -20,7 +20,7 @@
           "id": "Fire-d1668070-2069-44cb-62ea-bcd8b6c85285"
         }
       ],
-      "simulation": "task_01",
+      "simulation": "task_04",
       "populationSampleFactor": 1,
       "ensemble": "berend",
       "fireStations": [

@@ -21,6 +21,8 @@ import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
+from simcity.util import listfiles
+from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
 from uuid import uuid4
 import os
@@ -28,7 +30,6 @@ import json
 import sys
 
 prefix = '/explore'
-
 
 config = simcity.Config()
 config.add_section('task-db', {})
@@ -54,21 +55,6 @@ config_sim = simcity.get_config().section('Simulations')
 # Mock database using a dictionary
 mock_db = dict()
 
-
-# Helper function to convert UTF-8 json string
-# into python compatible data strings
-def convert_to_bytes(_input):
-    if isinstance(_input, dict):
-        return {convert_to_bytes(key): convert_to_bytes(value)
-                for key, value in _input.items()}
-    elif isinstance(_input, list):
-        return [convert_to_bytes(element) for element in _input]
-    elif isinstance(_input, unicode):
-        return _input.encode('utf-8')
-    else:
-        return _input
-
-
 # Load a json file with pre made test tasks
 def load_pre_made_tasks():
     for _root, dirs, files in os.walk('mock_tasks', topdown=False):
@@ -77,10 +63,7 @@ def load_pre_made_tasks():
                 filename = os.path.join(_root, name)
                 with open(filename) as _file:
                     task = json.load(_file)
-                    if sys.version_info[0] == 2:
-                        task = convert_to_bytes(task)
-
-                    mock_db[task['_id']] = task
+                    mock_db[task['id']] = task
 
 # WARNING:
 # Loading the json file in this manner probably means
@@ -210,7 +193,6 @@ def simulate_name_version(name, version=None):
             '_rev': uuid4().hex,
             'lock': 0,
             'done': 0,
-            'todo': 1,
             'name': name,
             'command': sim['command'],
             'arguments': sim.get('arguments', []),
@@ -226,9 +208,6 @@ def simulate_name_version(name, version=None):
         task_props['ensemble'] = query['ensemble']
     if 'simulation' in query:
         task_props['simulation'] = query['simulation']
-
-    if task_id is not None:
-        task_props['_id'] = task_id
 
     if task_id in mock_db:
         return error(400, "simulation name " + task_id + " already taken")
@@ -332,7 +311,7 @@ def simulations_view(name, version):
 
 @get(prefix + '/simulation/<id>/<attachment>')
 def get_attachment(id, attachment):
-        return error(501, "Not Implemented")
+    return static_file(os.path.join('mock_results', attachment), root=project_dir)
 
 
 @delete(prefix + '/simulation/<_id>')

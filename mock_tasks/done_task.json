@@ -1,12 +1,16 @@
 {
-  "id": "mock_added_task_1",
-  "key": "mock_added_task_1",
+  "id": "mock_done_task_2",
+  "key": "mock_added_task_2",
   "value": {
-    "_id": "mock_added_task_1",
-    "_rev": "9bd09b69824a40429fa7430c6688b608",
-    "uploads": {},
-    "lock": 0,
-    "done": 0,
+    "_id": "mock_done_task_2",
+    "_rev": "abd09b69824a40429fa7430c6688b608",
+    "uploads": {
+      "WardGeo": "/explore/simulation/mock_done_task_2/WardGeoResponse.json",
+      "swagger.json": "/explore/doc/?format=swagger"
+    },
+    "lock": 1468497000,
+    "done": 1468497030,
+    "status": "done",
     "name": "matsim",
     "version": "0.5",
     "command": "~/bangalore-matsim-0.4/matsim.py",
@@ -20,7 +24,7 @@
           "id": "Fire-d1668070-2069-44cb-62ea-bcd8b6c85285"
         }
       ],
-      "simulation": "task_01",
+      "simulation": "task_02",
       "populationSampleFactor": 1,
       "ensemble": "berend",
       "fireStations": [
