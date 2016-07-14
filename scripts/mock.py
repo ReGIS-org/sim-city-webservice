@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gevent import monkey; monkey.patch_all()
-
+#
+# This file implements a mock version of the normal webservice
+#
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
@@ -23,20 +24,51 @@ import simcity
 from simcity.util import listfiles
 from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
-from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
-                          PreconditionFailed, ServerError)
+from uuid import uuid4
 import os
 import json
+import sys
 
-simcity.init(None)
-
-config_sim = simcity.get_config().section('Simulations')
-couch_cfg = simcity.get_config().section('task-db')
 prefix = '/explore'
+
+config = simcity.Config()
+config.add_section('task-db', {})
+config.add_section('Simulations', {
+    'max_jobs': 1,
+    'path': 'simulations'
+})
+config.add_section('Schemas', {
+    'path': 'schemas'
+})
+config.add_section('Resources', {
+    'path': 'resources'
+})
+
+simcity.init(config)
 
 # Get project directory
 file_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(file_dir)
+
+config_sim = simcity.get_config().section('Simulations')
+
+# Mock database using a dictionary
+mock_db = dict()
+
+# Load a json file with pre made test tasks
+def load_pre_made_tasks():
+    for _root, dirs, files in os.walk('mock_tasks', topdown=False):
+        for name in files:
+            if name.endswith('.json'):
+                filename = os.path.join(_root, name)
+                with open(filename) as _file:
+                    task = json.load(_file)
+                    mock_db[task['id']] = task
+
+# WARNING:
+# Loading the json file in this manner probably means
+# it is loaded for every request so we shouldn't make too many
+load_pre_made_tasks()
 
 # Remove spaces from json output
 bottle.uninstall('json')
@@ -44,6 +76,7 @@ bottle.install(bottle.JSONPlugin(
     json_dumps=lambda x: json.dumps(x, separators=(',', ':'))))
 
 
+# Remove trailing / from request
 @hook('before_request')
 def strip_path():
     request.environ['PATH_INFO'] = request.environ['PATH_INFO'].rstrip('/')
@@ -52,6 +85,12 @@ def strip_path():
 @get(prefix)
 def root():
     return get_doc_type('swagger')
+
+
+@get(prefix + '/doc')
+def get_doc():
+    doc_format = request.query.get('format', 'html')
+    return get_doc_type(doc_format)
 
 
 @get(prefix + '/doc')
@@ -95,6 +134,7 @@ def simulate_list():
 @get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
+        response.status = 200
         return {'name': name, 'versions': get_simulation_versions(name)}
     except HTTPResponse as ex:
         return ex
@@ -107,6 +147,7 @@ def get_simulation_by_name_version(name, version=None):
         chosen_sim = sim[version]
         chosen_sim['name'] = name
         chosen_sim['version'] = version
+        response.status = 200
         return chosen_sim
     except HTTPResponse as ex:
         return ex
@@ -119,14 +160,20 @@ def simulate_name(name):
 
 @post(prefix + '/simulate/<name>/<version>')
 def simulate_name_version(name, version=None):
+    if not hasattr(simulate_name_version, 'nextId'):
+        # Initialize static variable
+        simulate_name_version.nextId = 0
+
     try:
         sim, version = get_simulation_config(name, version, 'simulations')
         sim = sim[version]
         query = dict(request.json)
-        task_id = None
         if '_id' in query:
             task_id = query['_id']
             del query['_id']
+        else:
+            task_id = str(simulate_name_version.nextId)
+            simulate_name_version.nextId += 1
 
         simcity.parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
@@ -136,37 +183,46 @@ def simulate_name_version(name, version=None):
     except EnvironmentError as ex:
         return error(500, ex.message)
 
+    # Create the response we would normally get from
+    # the database
     task_props = {
-        'name': name,
-        'command': sim['command'],
-        'arguments': sim.get('arguments', []),
-        'parallelism': sim.get('parallelism', '*'),
-        'version': version,
-        'input': query,
+        'id': task_id,
+        'key': task_id,
+        'value': {
+            '_id': task_id,
+            '_rev': uuid4().hex,
+            'lock': 0,
+            'done': 0,
+            'name': name,
+            'command': sim['command'],
+            'arguments': sim.get('arguments', []),
+            'parallelism': sim.get('parallelism', '*'),
+            'version': version,
+            'input': query,
+            'uploads': {},
+            'error': []
+        }
     }
+
     if 'ensemble' in query:
         task_props['ensemble'] = query['ensemble']
     if 'simulation' in query:
         task_props['simulation'] = query['simulation']
 
-    if task_id is not None:
-        task_props['_id'] = task_id
-
-    try:
-        token = simcity.add_task(task_props)
-    except ResourceConflict:
+    if task_id in mock_db:
         return error(400, "simulation name " + task_id + " already taken")
 
-    try:
-        simcity.submit_if_needed(config_sim['default_host'], 1)
-    except:
-        pass  # too bad. User can call /explore/job.
+    # Add the new task to the "database"
+    mock_db[task_id] = task_props
 
     response.status = 201  # created
-    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']),
-                       couch_cfg['database'], token.id)
+
+    # Normally we return a link to the database, but now
+    # we point to sim-city-webservice
+    host = bottle.request.get_header('host')
+    url = '%s/task/%s' % (host, task_id)
     response.set_header('Location', url)
-    return token.value
+    return task_props
 
 
 @get(prefix + '/schema')
@@ -196,97 +252,85 @@ def resource_name(name):
 @get(prefix + '/view/totals')
 def overview():
     try:
-        return simcity.overview_total()
+        return mock_overview_total()
     except:
         return error(500, "cannot read overview")
 
 
+def mock_overview_total():
+    views = ['todo', 'locked', 'error', 'done',
+             'finished_jobs', 'active_jobs', 'pending_jobs']
+
+    num = dict((view, 0) for view in views)
+
+    for key, task in mock_db.items():
+        for view in views:
+            if view in task['value'] and task['value'][view] == 1:
+                num[view] += 1
+
+    return num
+
+
 @post(prefix + '/job')
 def submit_job():
-    host = request.query.get('host', default=config_sim['default_host'])
-    try:
-        job = simcity.submit_if_needed(host, int(config_sim['max_jobs']))
-    except ValueError:
-        return error(404, "Host " + host + " unknown")
-    except IOError:
-        return error(502, "Cannot connect to host")
+    if not hasattr(submit_job, 'batch_id'):
+        submit_job.batch_id = 1
+
+    # Mock the response for submitting the job
+    host = config_sim['default_host']
+    _prefix = host + '-'
+    batch_id = str(submit_job.batch_id)
+    submit_job.batch_id += 1
+    job_id = 'job_' + _prefix + uuid4().hex
+
+    response.status = 201  # created
+    return {'_id': job_id, 'batch_id': batch_id, 'hostname': host}
+
+
+@get(prefix + '/simulation/<_id>')
+def get_simulation(_id):
+    if _id in mock_db:
+        return mock_db[_id]['value']
     else:
-        if job is None:
-            response.status = 503  # service temporarily unavailable
-        else:
-            response.status = 201  # created
-            return {key: job[key] for key in ['_id', 'batch_id', 'hostname']}
+        return error(404, "simulation does not exist")
 
 
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
     version = get_simulation_config(name, version, 'simulations')[1]
-    db = simcity.get_task_database()
-    design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 
-    url = db.url
-    if not url.endswith('/'):
-        url += '/'
-    location = '{0}_design/{1}/_view/all_docs'.format(url, design_doc)
+    simulations = [task for k, task in mock_db.items() if
+                   task['value']['name'] == name and
+                   task['value']['version'] == version and
+                   (ensemble is None or task['value']['ensemble'] == ensemble)]
 
-    response.status = 302  # temporary redirect
-    response.set_header('Location', location)
-    return
-
-
-@get(prefix + '/simulation/<id>')
-def get_simulation(id):
-    try:
-        return simcity.get_task_database().get(id)
-    except ValueError:
-        return error(404, "simulation does not exist")
+    response.status = 200
+    return {'total_rows': len(simulations), 'offset': 0, 'rows': simulations}
 
 
 @get(prefix + '/simulation/<id>/<attachment>')
 def get_attachment(id, attachment):
-    db = simcity.get_task_database()
-    try:
-        task = db.get(id)
-    except ValueError:
-        return error(404, "simulation does not exist")
-
-    if attachment in task.attachments:
-        url = db.url.rstrip('/')
-
-        response.status = 302  # temporary redirect
-        response.set_header('Location',
-                            '{0}/{1}/{2}'.format(url, id, attachment))
-    elif attachment in task.uploads:
-        response.status = 302  # temporary redirect
-        response.set_header('Location', task.uploads[attachment])
-    else:
-        return error(404, "attachment not found")
+    return static_file(os.path.join('mock_results', attachment), root=project_dir)
 
 
-@delete(prefix + '/simulation/<id>')
-def del_simulation(id):
+@delete(prefix + '/simulation/<_id>')
+def del_simulation(_id):
     rev = request.query.get('rev')
     if rev is None:
         rev = request.get_header('If-Match')
     if rev is None:
         return error(409, "revision not specified")
 
-    task = simcity.Document({'_id': id, '_rev': rev})
-
-    try:
-        simcity.get_task_database().delete(task)
-        return {'ok': True}
-    except Unauthorized:
-        return error(401, "unauthorized")
-    except ResourceNotFound:
-        return error(404, "document not found")
-    except ResourceConflict:
-        return error(409, "resource conflict")
-    except PreconditionFailed:
-        return error(412, "precondition failed")
-    except ServerError:
-        return error(502, "CouchDB connection failed")
+    if _id in mock_db:
+        task = mock_db[_id]
+        if task['value']['_rev'] == rev:
+            del mock_db[_id]
+            return {'ok': True}
+        else:
+            return error(409, "resource conflict")
+    else:
+        return error(404, "Resource does not exist")
 
 
 @get(prefix + '/hosts')
@@ -302,4 +346,4 @@ def get_hosts():
     return hosts
 
 if __name__ == '__main__':
-    run(host='localhost', port=9090, server='gevent')
+    run(host='localhost', port=9090, server='wsgiref')

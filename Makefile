@@ -39,6 +39,9 @@ clean:
 
 serve-dev:
 	python -m bottle scripts.app --debug --reload --bind localhost:9090 -s gevent
+    
+serve-mock:
+	python -m bottle scripts.mock --debug --reload --bind localhost:9090
 
 serve:
 	python -m bottle scripts.app --bind localhost:9090 -s gevent

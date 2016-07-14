@@ -1,0 +1,45 @@
+{
+  "id": "mock_done_task_3",
+  "key": "mock_done_task_3",
+  "value": {
+    "_id": "mock_done_task_3",
+    "_rev": "cbd09b69824a40429fa7430c6688b608",
+    "uploads": {
+      "apiary.html": "/explore/doc",
+      "swagger.json": "/explore/doc/?format=swagger"
+    },
+    "lock": -1,
+    "done": -1,
+    "name": "matsim",
+    "version": "0.5",
+    "command": "~/bangalore-matsim-0.4/matsim.py",
+    "parallelism": "*",
+    "error": [
+      {
+        "time": 1468497030,
+        "message": "We encountered an error!",
+        "exception": "You foolish fool exception"
+      }
+    ],
+    "input": {
+      "fires": [
+        {
+          "y": 12.979133130990254,
+          "x": 77.6012420654297,
+          "id": "Fire-d1668070-2069-44cb-62ea-bcd8b6c85285"
+        }
+      ],
+      "simulation": "task_03",
+      "populationSampleFactor": 1,
+      "ensemble": "mock",
+      "fireStations": [
+        {
+          "y": 12.988500396985364,
+          "x": 77.59643554687501,
+          "id": "FireStation-c0efee90-40db-4f14-e393-ffa881563004"
+        }
+      ]
+    },
+    "arguments": []
+  }
+}

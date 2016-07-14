@@ -1,0 +1,46 @@
+{
+  "id": "mock_done_task_5",
+  "key": "mock_done_task_5",
+  "value": {
+    "_id": "mock_done_task_5",
+    "_rev": "abd09b69824a40429fa7430c6688b608",
+    "uploads": {},
+    "lock": 1468497000,
+    "done": 1468497030,
+    "status": "done",
+    "name": "matsim",
+    "version": "0.5",
+    "command": "~/bangalore-matsim-0.4/matsim.py",
+    "parallelism": "*",
+    "error": [],
+    "_attachments": {
+      "WardGeoResponse.json": {
+        "content_type": "text/json",
+        "digest": "md5-MDY2NDM1ZmQ2YzIwMmQxNGM2NTkyMGQ4NjYyNDRlZDkgIC0K==",
+        "length": 1188783,
+        "revpos": 1,
+        "stub": true
+      }
+    },
+    "input": {
+      "fires": [
+        {
+          "y": 12.979133130990254,
+          "x": 77.6012420654297,
+          "id": "Fire-d1668070-2069-44cb-62ea-bcd8b6c85285"
+        }
+      ],
+      "simulation": "task_05",
+      "populationSampleFactor": 1,
+      "ensemble": "mock",
+      "fireStations": [
+        {
+          "y": 12.988500396985364,
+          "x": 77.59643554687501,
+          "id": "FireStation-c0efee90-40db-4f14-e393-ffa881563004"
+        }
+      ]
+    },
+    "arguments": []
+  }
+}
