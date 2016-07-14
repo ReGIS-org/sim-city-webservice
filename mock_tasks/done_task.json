@@ -26,7 +26,7 @@
       ],
       "simulation": "task_02",
       "populationSampleFactor": 1,
-      "ensemble": "berend",
+      "ensemble": "mock",
       "fireStations": [
         {
           "y": 12.988500396985364,
