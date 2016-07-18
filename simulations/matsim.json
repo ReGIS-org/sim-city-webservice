@@ -98,7 +98,7 @@
   },
   "0.5": {
     "command": "~/bangalore-matsim-0.4/matsim.py",
-    "resourceTypeUrl": "resource/matsim.json",
+    "resourceTypeUrl": "explore/resource/matsim",
     "form": [
         "ensemble", 
         "simulation", 

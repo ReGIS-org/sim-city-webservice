@@ -15,13 +15,15 @@
     "error": [],
     "_attachments": {
       "WardGeoResponse.json": {
-        "content_type": "text/json",
+        "content_type": "application/json",
         "digest": "md5-MDY2NDM1ZmQ2YzIwMmQxNGM2NTkyMGQ4NjYyNDRlZDkgIC0K==",
         "length": 1188783,
         "revpos": 1,
         "stub": true
       }
     },
+    "typeUrl": "/explore/resource/matsim",
+    "defaultFeatureType": "Ward",
     "input": {
       "fires": [
         {

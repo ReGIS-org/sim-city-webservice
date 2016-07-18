@@ -5,9 +5,12 @@
     "_id": "mock_done_task_2",
     "_rev": "abd09b69824a40429fa7430c6688b608",
     "uploads": {
-      "WardGeo": "/explore/simulation/mock_done_task_2/WardGeoResponse.json",
-      "swagger.json": "/explore/doc/?format=swagger"
+      "WardGeo.json": "/explore/simulation/mock_done_task_2/WardGeoResponse.json",
+      "WardGeo2.json": "/explore/simulation/mock_done_task_2/WardGeoResponse.json",
+      "WardGeo3.json": "/explore/simulation/mock_done_task_2/WardGeoResponse.json"
     },
+    "typeUrl": "/explore/resource/matsim",
+    "defaultFeatureType": "Ward",
     "lock": 1468497000,
     "done": 1468497030,
     "status": "done",
