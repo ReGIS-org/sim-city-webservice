@@ -32,7 +32,9 @@ import sys
 prefix = '/explore'
 
 config = simcity.Config()
-config.add_section('task-db', {})
+config.add_section('task-db', {
+    'no_database': True
+})
 config.add_section('Simulations', {
     'max_jobs': 1,
     'path': 'simulations'
