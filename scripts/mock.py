@@ -20,40 +20,26 @@
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
-import simcity
+from simcity import parse_parameters, Config
 from simcity.util import listfiles
 from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
 from uuid import uuid4
 import os
 import json
-import sys
 
 prefix = '/explore'
-
-config = simcity.Config()
-config.add_section('task-db', {})
-config.add_section('Simulations', {
-    'max_jobs': 1,
-    'path': 'simulations'
-})
-config.add_section('Schemas', {
-    'path': 'schemas'
-})
-config.add_section('Resources', {
-    'path': 'resources'
-})
-
-simcity.init(config)
 
 # Get project directory
 file_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(file_dir)
 
-config_sim = simcity.get_config().section('Simulations')
+config_sim = {'max_jobs': 1}
+config_hosts = {}
 
 # Mock database using a dictionary
 mock_db = dict()
+
 
 # Load a json file with pre made test tasks
 def load_pre_made_tasks():
@@ -175,7 +161,7 @@ def simulate_name_version(name, version=None):
             task_id = str(simulate_name_version.nextId)
             simulate_name_version.nextId += 1
 
-        simcity.parse_parameters(query, sim['properties'])
+        parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
@@ -258,15 +244,23 @@ def overview():
 
 
 def mock_overview_total():
-    views = ['todo', 'locked', 'error', 'done',
+    views = ['todo', 'locked', 'error', 'done', 'unknown',
              'finished_jobs', 'active_jobs', 'pending_jobs']
 
     num = dict((view, 0) for view in views)
 
     for key, task in mock_db.items():
-        for view in views:
-            if view in task['value'] and task['value'][view] == 1:
-                num[view] += 1
+        val = task['value']
+        if val['done'] > 0:
+            num['done'] += 1
+        elif val['lock'] > 0:
+            num['locked'] += 1
+        elif val['lock'] == 0:
+            num['todo'] += 1
+        elif val['lock'] == -1:
+            num['error'] += 1
+        else:
+            num['unknown'] += 1
 
     return num
 
@@ -335,15 +329,7 @@ def del_simulation(_id):
 
 @get(prefix + '/hosts')
 def get_hosts():
-    hosts = {}
-    for section in simcity.get_config().sections():
-        if section.endswith('-host'):
-            host_name = section[:-5]
-            hosts[host_name] = {}
-            if config_sim.get('default_host') == host_name:
-                hosts[host_name]['default'] = True
-
-    return hosts
+    return config_hosts
 
 if __name__ == '__main__':
     run(host='localhost', port=9090, server='wsgiref')
