@@ -20,7 +20,7 @@
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
-from simcity import parse_parameters, Config
+from simcity import parse_parameters
 from simcity.util import listfiles
 from simcityweb.util import get_simulation_versions
 from simcityweb import error, get_simulation_config
