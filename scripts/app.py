@@ -236,6 +236,19 @@ def simulations_view(name, version):
     return
 
 
+@get(prefix + '/view/jobs')
+def jobs_view():
+    db = simcity.get_job_database()
+    
+    url = db.url
+    if not url.endswith('/'):
+        url += '/'
+    location = '{0}_design/Monitor/_view/active_jobs'.format(url)
+
+    response.status = 302  # temporary redirect
+    response.set_header('Location', location)
+
+
 @get(prefix + '/simulation/<id>')
 def get_simulation(id):
     try:
@@ -258,9 +271,9 @@ def get_attachment(id, attachment):
         response.status = 302  # temporary redirect
         response.set_header('Location',
                             '{0}/{1}/{2}'.format(url, id, attachment))
-    elif attachment in task.uploads:
+    elif attachment in task.files:
         download_dir = os.path.join(tempfile.gettempdir(), task.id)
-        os.makedirs(download_dir, exist_ok=True)
+        download_dir = tempfile.mkdtemp(prefix=download_dir)
         simcity.download_attachment(task, download_dir, attachment)
         return static_file(os.path.join(download_dir, attachment), root='/')
     else:
