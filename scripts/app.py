@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import tempfile
 
 from gevent import monkey; monkey.patch_all()
 
@@ -258,8 +259,10 @@ def get_attachment(id, attachment):
         response.set_header('Location',
                             '{0}/{1}/{2}'.format(url, id, attachment))
     elif attachment in task.uploads:
-        response.status = 302  # temporary redirect
-        response.set_header('Location', task.uploads[attachment])
+        download_dir = os.path.join(tempfile.gettempdir(), task.id)
+        os.makedirs(download_dir, exist_ok=True)
+        simcity.download_attachment(task, download_dir, attachment)
+        return static_file(os.path.join(download_dir, attachment), root='/')
     else:
         return error(404, "attachment not found")
 
