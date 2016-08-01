@@ -244,7 +244,7 @@ def overview():
 
 
 def mock_overview_total():
-    views = ['todo', 'locked', 'error', 'done', 'unknown',
+    views = ['pending', 'in_progress', 'error', 'done', 'unknown',
              'finished_jobs', 'active_jobs', 'pending_jobs']
 
     num = dict((view, 0) for view in views)
@@ -253,8 +253,8 @@ def mock_overview_total():
         val = task['value']
         if val['done'] > 0:
             num['done'] += 1
-        elif val['lock'] > 0:
-            num['locked'] += 1
+        elif val['in_progress'] > 0:
+            num['in_progress'] += 1
         elif val['lock'] == 0:
             num['todo'] += 1
         elif val['lock'] == -1:

@@ -386,14 +386,15 @@ Total number of jobs and tasks, categorized by status
 
 + Response 200 (application/json)
     + Attributes
-        + todo: 0 (number, optional) - number of tasks to be done
-        + locked: 0 (number, optional) - number of tasks currently being processed
+        + pending: 0 (number, optional) - number of tasks to be done
+        + in_progress: 0 (number, optional) - number of tasks currently being processed
         + done: 0 (number, optional) - number of tasks done processing
         + error: 0 (number, optional) - number of tasks that resulted in error
         + `pending_jobs`: 0 (number, optional) - number of jobs submitted but not started
-        + `active_jobs`: 0 (number, optional) - number of jobs currently being processed. This number may include jobs that were stopped before reporting that they were finished.
+        + `running_jobs`: 0 (number, optional) - number of jobs currently being processed. This number may include jobs that were stopped before reporting that they were finished.
         + `finished_jobs`: 0 (number, optional) - number of jobs that have finished processing. This number may include jobs that have reported finished but failed to be reported as queued.
         + `archived_jobs`: 0 (number, optional) - number of jobs that were archived after completing the entire pipeline of pending to finished.
+        + `active_jobs`: 0 (number, optional) - number of jobs that have not been archived.
 
 + Response 500 (application/json)
     + Attributes

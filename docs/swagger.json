@@ -946,13 +946,14 @@
                         "examples": {
                             "application/json": {
                                 "todo": 0,
-                                "locked": 0,
+                                "in_progress": 0,
                                 "done": 0,
                                 "error": 0,
                                 "pending_jobs": 0,
-                                "active_jobs": 0,
+                                "running_jobs": 0,
                                 "finished_jobs": 0,
-                                "archived_jobs": 0
+                                "archived_jobs": 0,
+                                "active_jobs": 0
                             }
                         },
                         "schema": {
@@ -963,7 +964,7 @@
                                     "type": "number",
                                     "description": "number of tasks to be done"
                                 },
-                                "locked": {
+                                "in_progress": {
                                     "type": "number",
                                     "description": "number of tasks currently being processed"
                                 },
@@ -979,7 +980,7 @@
                                     "type": "number",
                                     "description": "number of jobs submitted but not started"
                                 },
-                                "active_jobs": {
+                                "running_jobs": {
                                     "type": "number",
                                     "description": "number of jobs currently being processed. This number may include jobs that were stopped before reporting that they were finished."
                                 },
@@ -990,6 +991,10 @@
                                 "archived_jobs": {
                                     "type": "number",
                                     "description": "number of jobs that were archived after completing the entire pipeline of pending to finished."
+                                },
+                                "active_jobs": {
+                                    "type": "number",
+                                    "description": "number of jobs that have not yet been archived."
                                 }
                             }
                         }
