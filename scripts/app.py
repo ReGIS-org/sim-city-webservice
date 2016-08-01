@@ -258,7 +258,7 @@ def get_attachment(id, attachment):
         response.status = 302  # temporary redirect
         response.set_header('Location',
                             '{0}/{1}/{2}'.format(url, id, attachment))
-    elif attachment in task.uploads:
+    elif attachment in task.files:
         download_dir = os.path.join(tempfile.gettempdir(), task.id)
         os.makedirs(download_dir, exist_ok=True)
         simcity.download_attachment(task, download_dir, attachment)
