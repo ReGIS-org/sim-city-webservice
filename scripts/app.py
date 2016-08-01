@@ -259,14 +259,13 @@ def get_simulation(id):
 
 @get(prefix + '/simulation/<id>/<attachment>')
 def get_attachment(id, attachment):
-    db = simcity.get_task_database()
     try:
-        task = db.get(id)
+        task = simcity.get_task(id)
     except ValueError:
         return error(404, "simulation does not exist")
 
     if attachment in task.attachments:
-        url = db.url.rstrip('/')
+        url = simcity.get_task_database().url.rstrip('/')
 
         response.status = 302  # temporary redirect
         response.set_header('Location',
