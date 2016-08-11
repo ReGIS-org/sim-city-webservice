@@ -4,7 +4,7 @@ easywebdav==1.2.0
 gevent==1.1.1
 greenlet==0.4.9
 JPype1==0.6.1
-pyxenon==0.2.1
+pyxenon==0.2.2
 pystache==0.5.4
 requests==2.10.0
 -e git+https://github.com/indodutch/sim-city-client.git@develop#egg=simcity-0.4[xenon]
