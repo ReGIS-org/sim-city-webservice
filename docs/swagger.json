@@ -6,7 +6,7 @@
         "description": "The [SIM-CITY webservice](http://github.com/NLeSC/sim-city-webservice) starts\nsimulations and jobs using the\n[SIM-CITY client](http://github.com/NLeSC/sim-city-client).\n\n"
     },
     "host": "simcity.amsterdam-complexity.nl",
-    "basePath": "/explore/",
+    "basePath": "/explore",
     "schemes": [
         "https"
     ],
@@ -36,8 +36,8 @@
                         "headers": {},
                         "examples": {}
                     },
-                    "409": {
-                        "description": "Conflict",
+                    "406": {
+                        "description": "Not Acceptable",
                         "headers": {},
                         "examples": {
                             "application/json": {
@@ -47,18 +47,13 @@
                     }
                 },
                 "summary": "API documentation",
-                "description": "This page.\n\n",
+                "description": "This page, or with another `Accept` header, the raw API Blueprint (text/markdown) or Swagger (application/json) documentation.\n\n\n",
                 "tags": [
                     "API"
                 ],
-                "parameters": [
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "one of `api-blueprint`, `html` or `swagger`, documentation format. Defaults to html.",
-                        "required": true,
-                        "type": "string"
-                    }
+                "parameters": [],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -123,6 +118,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -147,7 +145,10 @@
                 "tags": [
                     "Jobs"
                 ],
-                "parameters": []
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ]
             }
         },
         "/simulate": {
@@ -183,7 +184,10 @@
                 "tags": [
                     "Simulations"
                 ],
-                "parameters": []
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ]
             }
         },
         "/simulate/{name}": {
@@ -273,6 +277,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -374,6 +381,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             },
             "post": {
@@ -483,6 +493,9 @@
                             }
                         }
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -658,6 +671,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             },
             "delete": {
@@ -701,6 +717,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -735,7 +754,10 @@
                 "tags": [
                     "Resources"
                 ],
-                "parameters": []
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ]
             }
         },
         "/resource/{name}": {
@@ -837,6 +859,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -871,7 +896,10 @@
                 "tags": [
                     "Schemas"
                 ],
-                "parameters": []
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ]
             }
         },
         "/schema/{name}": {
@@ -934,6 +962,9 @@
                         "required": true,
                         "type": "string"
                     }
+                ],
+                "produces": [
+                    "application/json"
                 ]
             }
         },
@@ -945,7 +976,7 @@
                         "headers": {},
                         "examples": {
                             "application/json": {
-                                "todo": 0,
+                                "pending": 0,
                                 "in_progress": 0,
                                 "done": 0,
                                 "error": 0,
@@ -960,7 +991,7 @@
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "type": "object",
                             "properties": {
-                                "todo": {
+                                "pending": {
                                     "type": "number",
                                     "description": "number of tasks to be done"
                                 },
@@ -994,7 +1025,7 @@
                                 },
                                 "active_jobs": {
                                     "type": "number",
-                                    "description": "number of jobs that have not yet been archived."
+                                    "description": "number of jobs that have not been archived."
                                 }
                             }
                         }
@@ -1024,7 +1055,10 @@
                 "tags": [
                     "Monitoring"
                 ],
-                "parameters": []
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ]
             }
         },
         "/view/simulations/{name}/{version}": {

@@ -52,7 +52,9 @@ def strip_path():
 
 @get(prefix)
 def root():
-    return get_doc_type('swagger')
+    doc_dir = os.path.join(project_dir, 'docs')
+    return static_file('swagger.json', mimetype='application/json',
+                       root=doc_dir)
 
 
 @get(prefix + '/doc')
@@ -70,12 +72,6 @@ def get_doc():
 
     doc_dir = os.path.join(project_dir, 'docs')
     return static_file(docs[accept], mimetype=accept, root=doc_dir)
-
-    doc_format = request.query.get('format', 'html')
-    return get_doc_type(doc_format)
-
-
-def get_doc_type(doc_type):
 
 
 @get(prefix + '/simulate')

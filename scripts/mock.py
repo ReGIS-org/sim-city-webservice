@@ -70,32 +70,26 @@ def strip_path():
 
 @get(prefix)
 def root():
-    return get_doc_type('swagger')
+    doc_dir = os.path.join(project_dir, 'docs')
+    return static_file('swagger.json', mimetype='application/json',
+                       root=doc_dir)
 
 
 @get(prefix + '/doc')
 def get_doc():
-    doc_format = request.query.get('format', 'html')
-    return get_doc_type(doc_format)
+    accept = request.headers().get('Accept', 'text/html')
 
-
-@get(prefix + '/doc')
-def get_doc():
-    doc_format = request.query.get('format', 'html')
-    return get_doc_type(doc_format)
-
-
-def get_doc_type(doc_type):
     docs = {
-        'html': 'apiary.html',
-        'swagger': 'swagger.json',
-        'api-blueprint': 'apiary.apib'
+        'text/html': 'apiary.html',
+        'application/json': 'swagger.json',
+        'text/markdown': 'apiary.apib'
     }
-    if doc_type not in docs:
-        return error(409, "documentation {0} not found. choose between {1}"
-                     .format(doc_type, docs.keys()))
+    if accept not in docs:
+        return error(406, "documentation {0} not found. choose between {1}"
+                     .format(accept, docs.keys()))
 
-    return static_file(os.path.join('docs', docs[doc_type]), root=project_dir)
+    doc_dir = os.path.join(project_dir, 'docs')
+    return static_file(docs[accept], mimetype=accept, root=doc_dir)
 
 
 @get(prefix + '/simulate')
@@ -220,7 +214,7 @@ def schema_list():
 @get(prefix + '/schema/<name>')
 def schema_name(name):
     return static_file(os.path.join('schemas', name + '.json'),
-                       root=project_dir)
+                       root=project_dir, mimetype='application/json')
 
 
 @get(prefix + '/resource')
@@ -232,7 +226,7 @@ def resource_list():
 @get(prefix + '/resource/<name>')
 def resource_name(name):
     return static_file(os.path.join('resources', name + '.json'),
-                       root=project_dir)
+                       root=project_dir, mimetype='application/json')
 
 
 @get(prefix + '/view/totals')
@@ -305,7 +299,8 @@ def simulations_view(name, version):
 
 @get(prefix + '/simulation/<id>/<attachment>')
 def get_attachment(id, attachment):
-    return static_file(os.path.join('mock_results', attachment), root=project_dir)
+    return static_file(os.path.join('mock_results', attachment),
+                       root=project_dir)
 
 
 @delete(prefix + '/simulation/<_id>')

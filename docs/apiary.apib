@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: https://simcity.amsterdam-complexity.nl/explore/
+HOST: https://simcity.amsterdam-complexity.nl/explore
 
 # SIM-CITY webservice
 
@@ -14,14 +14,28 @@ Swagger 2.0 API schema.
 
 + Response 200 (application/json)
 
-# API documentation [GET /doc{?format}]
-This page.
+# API documentation [GET /doc]
+This page, or with another `Accept` header, the raw API Blueprint (text/markdown) or Swagger (application/json) documentation.
 
-+ Parameters
-    + format (string) - one of `api-blueprint`, `html` or `swagger`, documentation format. Defaults to html.
+
++ Request web page
+    + Headers
+
+            Accept: text/html
+
++ Request raw API Blueprint
+    + Headers
+
+            Accept: text/markdown
+
++ Request swagger
+    + Headers
+
+            Accept: application/json
+
 
 + Response 200
-+ Response 409 (application/json)
++ Response 406 (application/json)
 
         {"error": "documentation type [type] not found, choose between [options]"}
 
