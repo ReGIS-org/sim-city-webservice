@@ -77,7 +77,7 @@ def root():
 
 @get(prefix + '/doc')
 def get_doc():
-    accept = request.headers().get('Accept', 'text/html')
+    accept = request.headers.get('Accept', 'text/html')
 
     docs = {
         'text/html': 'apiary.html',
