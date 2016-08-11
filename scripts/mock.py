@@ -161,7 +161,9 @@ def simulate_name_version(name, version=None):
     try:
         sim, version = get_simulation_config(name, version, 'simulations')
         sim = sim[version]
-        parse_parameters(query, sim['properties'])
+        sim['type'] = 'object'
+        sim['properties']['additionalProperties'] = False
+        parse_parameters(query, sim)
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
