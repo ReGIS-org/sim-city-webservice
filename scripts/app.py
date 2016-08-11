@@ -28,6 +28,7 @@ from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
                           PreconditionFailed, ServerError)
 import os
 import json
+import accept_types
 
 simcity.init(None)
 
@@ -59,19 +60,20 @@ def root():
 
 @get(prefix + '/doc')
 def get_doc():
-    accept = request.headers.get('Accept', 'text/html')
+    docs = [
+        ('text/html', 'apiary.html'),
+        ('application/json', 'swagger.json'),
+        ('text/markdown', 'apiary.apib'),
+    ]
+    accept = accept_types.get_best_match(
+        request.headers.get('Accept'), [t[0] for t in docs])
 
-    docs = {
-        'text/html': 'apiary.html',
-        'application/json': 'swagger.json',
-        'text/markdown': 'apiary.apib'
-    }
-    if accept not in docs:
+    if accept is None:
         return error(406, "documentation {0} not found. choose between {1}"
-                     .format(accept, docs.keys()))
+                     .format(accept, [t[0] for t in docs]))
 
     doc_dir = os.path.join(project_dir, 'docs')
-    return static_file(docs[accept], mimetype=accept, root=doc_dir)
+    return static_file(dict(docs)[accept], mimetype=accept, root=doc_dir)
 
 
 @get(prefix + '/simulate')
