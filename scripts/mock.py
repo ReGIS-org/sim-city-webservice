@@ -147,21 +147,25 @@ def simulate_name_version(name, version=None):
         simulate_name_version.nextId = 0
 
     try:
+        query = dict(request.json)
+    except TypeError:
+        return error(412, "request must contain json input")
+
+    if '_id' in query:
+        task_id = query['_id']
+        del query['_id']
+    else:
+        task_id = str(simulate_name_version.nextId)
+        simulate_name_version.nextId += 1
+
+    try:
         sim, version = get_simulation_config(name, version, 'simulations')
         sim = sim[version]
-        query = dict(request.json)
-        if '_id' in query:
-            task_id = query['_id']
-            del query['_id']
-        else:
-            task_id = str(simulate_name_version.nextId)
-            simulate_name_version.nextId += 1
-
         parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
-        return error(400, ex)
+        return error(412, ex)
     except EnvironmentError as ex:
         return error(500, ex.message)
 
@@ -192,7 +196,7 @@ def simulate_name_version(name, version=None):
         task_props['simulation'] = query['simulation']
 
     if task_id in mock_db:
-        return error(400, "simulation name " + task_id + " already taken")
+        return error(409, "simulation name " + task_id + " already taken")
 
     # Add the new task to the "database"
     mock_db[task_id] = task_props

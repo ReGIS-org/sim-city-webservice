@@ -393,8 +393,27 @@
                         "headers": {},
                         "examples": {}
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "error": "Version '0.5' of simulation 'sim1' not found."
+                            }
+                        },
+                        "schema": {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "description": "error message"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "headers": {},
                         "examples": {
                             "application/json": {
@@ -412,12 +431,12 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "412": {
+                        "description": "Precondition Failed",
                         "headers": {},
                         "examples": {
                             "application/json": {
-                                "error": "Version '0.5' of simulation 'sim1' not found."
+                                "error": "input is not json or does not validate against the parameters schema."
                             }
                         },
                         "schema": {
@@ -425,8 +444,7 @@
                             "type": "object",
                             "properties": {
                                 "error": {
-                                    "type": "string",
-                                    "description": "error message"
+                                    "type": "string"
                                 }
                             }
                         }

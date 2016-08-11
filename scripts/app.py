@@ -123,19 +123,23 @@ def simulate_name(name):
 @post(prefix + '/simulate/<name>/<version>')
 def simulate_name_version(name, version=None):
     try:
+        query = dict(request.json)
+    except TypeError:
+        return error(412, "request must contain json input")
+
+    task_id = None
+    if '_id' in query:
+        task_id = query['_id']
+        del query['_id']
+
+    try:
         sim, version = get_simulation_config(name, version, 'simulations')
         sim = sim[version]
-        query = dict(request.json)
-        task_id = None
-        if '_id' in query:
-            task_id = query['_id']
-            del query['_id']
-
         simcity.parse_parameters(query, sim['properties'])
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
-        return error(400, ex)
+        return error(412, ex)
     except EnvironmentError as ex:
         return error(500, ex.message)
 
@@ -158,7 +162,7 @@ def simulate_name_version(name, version=None):
     try:
         token = simcity.add_task(task_props)
     except ResourceConflict:
-        return error(400, "simulation name " + task_id + " already taken")
+        return error(409, "simulation name " + task_id + " already taken")
 
     try:
         simcity.submit_if_needed(config_sim['default_host'], 1)

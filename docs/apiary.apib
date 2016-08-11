@@ -176,13 +176,17 @@ the simulation engine should be provided in the request.
 
             Location: http://couchdb/database/task_12345
 
-+ Response 400 (application/json)
-    + Attributes
-        + error: simulation name task_12345 already taken (string) - error message.
-
 + Response 404 (application/json)
     + Attributes
         + error: Version '0.5' of simulation 'sim1' not found. (string) - error message
+
++ Response 409 (application/json)
+    + Attributes
+        + error: simulation name task_12345 already taken (string) - error message.
+
++ Response 412 (application/json)
+    + Attributes
+        + error: input is not json or does not validate against the parameters schema.
 
 + Response 500 (application/json)
     + Attributes
