@@ -141,7 +141,7 @@ def simulate_name_version(name, version=None):
     except HTTPResponse as ex:
         return ex
     except ValueError as ex:
-        return error(412, ex)
+        return error(412, str(ex))
     except EnvironmentError as ex:
         return error(500, ex.message)
 
