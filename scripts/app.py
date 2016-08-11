@@ -57,22 +57,25 @@ def root():
 
 @get(prefix + '/doc')
 def get_doc():
+    accept = request.headers().get('Accept', 'text/html')
+
+    docs = {
+        'text/html': 'apiary.html',
+        'application/json': 'swagger.json',
+        'text/markdown': 'apiary.apib'
+    }
+    if accept not in docs:
+        return error(406, "documentation {0} not found. choose between {1}"
+                     .format(accept, docs.keys()))
+
+    doc_dir = os.path.join(project_dir, 'docs')
+    return static_file(docs[accept], mimetype=accept, root=doc_dir)
+
     doc_format = request.query.get('format', 'html')
     return get_doc_type(doc_format)
 
 
 def get_doc_type(doc_type):
-    docs = {
-        'html': 'apiary.html',
-        'swagger': 'swagger.json',
-        'api-blueprint': 'apiary.apib'
-    }
-    if doc_type not in docs:
-        return error(409, "documentation {0} not found. choose between {1}"
-                     .format(doc_type, docs.keys()))
-
-    doc_dir = os.path.join(project_dir, 'docs')
-    return static_file(docs[doc_type], root=doc_dir)
 
 
 @get(prefix + '/simulate')
@@ -179,7 +182,7 @@ def schema_list():
 
 @get(prefix + '/schema/<name>')
 def schema_name(name):
-    return static_file(name + '.json',
+    return static_file(name + '.json', mimetype='application/json',
                        root=os.path.join(project_dir, 'schemas'))
 
 
@@ -191,7 +194,7 @@ def resource_list():
 
 @get(prefix + '/resource/<name>')
 def resource_name(name):
-    return static_file(name + '.json',
+    return static_file(name + '.json', mimetype='application/json',
                        root=os.path.join(project_dir, 'resources'))
 
 
