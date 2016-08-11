@@ -71,7 +71,8 @@ def get_doc_type(doc_type):
         return error(409, "documentation {0} not found. choose between {1}"
                      .format(doc_type, docs.keys()))
 
-    return static_file(os.path.join('docs', docs[doc_type]), root=project_dir)
+    doc_dir = os.path.join(project_dir, 'docs')
+    return static_file(docs[doc_type], root=doc_dir)
 
 
 @get(prefix + '/simulate')
@@ -178,8 +179,8 @@ def schema_list():
 
 @get(prefix + '/schema/<name>')
 def schema_name(name):
-    return static_file(os.path.join('schemas', name + '.json'),
-                       root=project_dir)
+    return static_file(name + '.json',
+                       root=os.path.join(project_dir, 'schemas'))
 
 
 @get(prefix + '/resource')
@@ -190,8 +191,8 @@ def resource_list():
 
 @get(prefix + '/resource/<name>')
 def resource_name(name):
-    return static_file(os.path.join('resources', name + '.json'),
-                       root=project_dir)
+    return static_file(name + '.json',
+                       root=os.path.join(project_dir, 'resources'))
 
 
 @get(prefix + '/view/totals')
@@ -271,10 +272,11 @@ def get_attachment(id, attachment):
         response.set_header('Location',
                             '{0}/{1}/{2}'.format(url, id, attachment))
     elif attachment in task.files:
-        download_dir = os.path.join(tempfile.gettempdir(), task.id)
-        download_dir = tempfile.mkdtemp(prefix=download_dir)
+        download_dir = tempfile.mkdtemp()
         simcity.download_attachment(task, download_dir, attachment)
-        return static_file(os.path.join(download_dir, attachment), root='/')
+        content_type = task.files[attachment].get('content_type', 'auto')
+        return static_file(attachment, mimetype=content_type,
+                           root=download_dir)
     else:
         return error(404, "attachment not found")
 
