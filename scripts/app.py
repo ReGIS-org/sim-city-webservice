@@ -176,6 +176,7 @@ def simulate_name_version(name, version=None):
         couch_cfg.get('public_url', couch_cfg['url']).rstrip('/'),
         couch_cfg['database'], token.id)
     response.set_header('Location', url)
+    response.set_header('Content-type', 'application/json')
     return token.value
 
 
@@ -240,6 +241,7 @@ def simulations_view(name, version):
 
     response.status = 302  # temporary redirect
     response.set_header('Location', location)
+    response.set_header('Content-type', 'application/json')
     return
 
 
@@ -251,6 +253,7 @@ def jobs_view():
     location = '{0}/_design/Monitor/_view/active_jobs'.format(url)
 
     response.status = 302  # temporary redirect
+    response.set_header('Content-type', 'application/json')
     response.set_header('Location', location)
 
 
@@ -273,6 +276,7 @@ def get_attachment(id, attachment):
         url = simcity.get_task_database().url.rstrip('/')
 
         response.status = 302  # temporary redirect
+        response.set_header('Content-type', 'application/json')
         response.set_header('Location',
                             '{0}/{1}/{2}'.format(url, id, attachment))
     elif attachment in task.files:
