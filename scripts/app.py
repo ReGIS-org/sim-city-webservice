@@ -172,8 +172,9 @@ def simulate_name_version(name, version=None):
         pass  # too bad. User can call /explore/job.
 
     response.status = 201  # created
-    url = '%s%s/%s' % (couch_cfg.get('public_url', couch_cfg['url']),
-                       couch_cfg['database'], token.id)
+    url = '{0}/{1}/{2}'.format(
+        couch_cfg.get('public_url', couch_cfg['url']).rstrip('/'),
+        couch_cfg['database'], token.id)
     response.set_header('Location', url)
     return token.value
 
@@ -234,10 +235,8 @@ def simulations_view(name, version):
     db = simcity.get_task_database()
     design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 
-    url = db.url
-    if not url.endswith('/'):
-        url += '/'
-    location = '{0}_design/{1}/_view/all_docs'.format(url, design_doc)
+    url = db.url.rstrip('/')
+    location = '{0}/_design/{1}/_view/all_docs'.format(url, design_doc)
 
     response.status = 302  # temporary redirect
     response.set_header('Location', location)
@@ -248,10 +247,8 @@ def simulations_view(name, version):
 def jobs_view():
     db = simcity.get_job_database()
     
-    url = db.url
-    if not url.endswith('/'):
-        url += '/'
-    location = '{0}_design/Monitor/_view/active_jobs'.format(url)
+    url = db.url.rstrip('/')
+    location = '{0}/_design/Monitor/_view/active_jobs'.format(url)
 
     response.status = 302  # temporary redirect
     response.set_header('Location', location)
