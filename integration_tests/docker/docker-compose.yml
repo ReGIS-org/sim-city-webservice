@@ -1,0 +1,46 @@
+version: '2'
+services:
+  taskdb:
+    image: klaemo/couchdb
+    ports:
+      - "5784:5984"
+    environment:
+      COUCHDB_USER: simcityadmin
+      COUCHDB_PASSWORD: simcity
+  jobdb:
+    image: klaemo/couchdb
+    ports:
+      - "5884:5984"
+    environment:
+      COUCHDB_USER: simcityadmin
+      COUCHDB_PASSWORD: simcity
+  simcity_webservice:
+    build:
+      context: simcity-webservice
+    ports:
+      - "9098:9090"
+    links:
+      - taskdb
+      - jobdb
+      - webdav
+      - slurm
+  webdav:
+    build:
+      context: simcity-webdav
+    ports:
+      - "8080:80"
+  # Slurm stores accounting in MySQL
+  mysql:
+    image: mysql:5.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=xenon-slurm-pw
+  slurm:
+    build:
+      context: simcity-slurm
+    ports:
+      - "10022:22"
+    links:
+      - mysql
+      - jobdb
+      - taskdb
+      - webdav
