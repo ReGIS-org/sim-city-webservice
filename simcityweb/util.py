@@ -107,3 +107,14 @@ def get_simulation_versions(name):
     sim = get_simulation_config(name, None, 'simulations')[0]
     sorted_versions = sorted([parse_version(v) for v in sim.keys()])
     return [str(version) for version in sorted_versions]
+
+
+def view_to_json(view):
+    ret = {
+        'total_rows': view.total_rows,
+        'rows': view.rows,
+        'offset': view.offset,
+    }
+    if view.update_seq is not None:
+        ret['update_seq'] = view.update_seq
+    return ret

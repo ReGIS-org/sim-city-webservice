@@ -22,7 +22,7 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
 from simcity.util import listfiles
-from simcityweb.util import get_simulation_versions
+from simcityweb.util import get_simulation_versions, view_to_json
 from simcityweb import error, get_simulation_config
 from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
                           PreconditionFailed, ServerError)
@@ -172,11 +172,8 @@ def simulate_name_version(name, version=None):
         pass  # too bad. User can call /explore/job.
 
     response.status = 201  # created
-    url = '{0}/{1}/{2}'.format(
-        couch_cfg.get('public_url', couch_cfg['url']).rstrip('/'),
-        couch_cfg['database'], token.id)
+    url = '{0}/simulation/{1}'.format(prefix, token.id)
     response.set_header('Location', url)
-    response.set_header('Content-type', 'application/json')
     return token.value
 
 
@@ -236,25 +233,12 @@ def simulations_view(name, version):
     db = simcity.get_task_database()
     design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 
-    url = db.url.rstrip('/')
-    location = '{0}/_design/{1}/_view/all_docs'.format(url, design_doc)
-
-    response.status = 302  # temporary redirect
-    response.set_header('Location', location)
-    response.set_header('Content-type', 'application/json')
-    return
+    return view_to_json(db.view('all_docs', design_doc=design_doc))
 
 
 @get(prefix + '/view/jobs')
 def jobs_view():
-    db = simcity.get_job_database()
-    
-    url = db.url.rstrip('/')
-    location = '{0}/_design/Monitor/_view/active_jobs'.format(url)
-
-    response.status = 302  # temporary redirect
-    response.set_header('Content-type', 'application/json')
-    response.set_header('Location', location)
+    return view_to_json(simcity.get_job_database().view('active_jobs'))
 
 
 @get(prefix + '/simulation/<id>')
@@ -276,7 +260,6 @@ def get_attachment(id, attachment):
         url = simcity.get_task_database().url.rstrip('/')
 
         response.status = 302  # temporary redirect
-        response.set_header('Content-type', 'application/json')
         response.set_header('Location',
                             '{0}/{1}/{2}'.format(url, id, attachment))
     elif attachment in task.files:
