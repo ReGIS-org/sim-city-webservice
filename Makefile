@@ -22,13 +22,13 @@ pyflakes:
 
 unittest:
 	@echo "======= Unit Tests ========="
-	@nosetests
+	@nosetests tests
 
 test: test-requirements pyflakes unittest
 
 unittest-coverage:
 	@echo "======= Unit Tests ========="
-	@nosetests --with-coverage --cover-package=simcityweb
+	@nosetests --with-coverage --cover-package=simcityweb tests
 
 fulltest: test-requirements pyflakes unittest-coverage
 
