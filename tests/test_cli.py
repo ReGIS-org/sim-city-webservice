@@ -67,7 +67,6 @@ def test_confirm_empty():
     assert_equals("lalala [y/N]? ", my_input.messages[0])
 
 
-
 def test_confirm_invalid():
     my_input = CliInput(["neither", ""])
     assert_equals(True, confirm("lalala",
@@ -99,7 +98,7 @@ def test_choice_dialog_invalid_option():
 def test_choice_dialog_default_option():
     CliInput([""])
     assert_equals("option1", choice_dialog("opt", ("option0", "option1"),
-        default_response="option1"))
+                  default_response="option1"))
 
 
 def test_choice_dialog_invalid_default_option_raises():

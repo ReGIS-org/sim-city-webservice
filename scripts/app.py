@@ -15,7 +15,7 @@
 # limitations under the License.
 import tempfile
 
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey; monkey.patch_all()  # noqa E702
 
 import bottle
 from bottle import (post, get, run, delete, request, response, HTTPResponse,

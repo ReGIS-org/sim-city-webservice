@@ -10,4 +10,4 @@ setup(name='simcityweb',
       url='https://esciencecenter.nl/projects/sim-city/',
       packages=['simcityweb'],
       install_requires=["gevent", "simcity[xenon]", "bottle", "accept-types"],
-     )
+      )
