@@ -6,7 +6,11 @@ Contains a Python JSON webservice for a SIM-CITY webserver. It uses the API from
 
 Following the SIM-CITY client API, a `./config.ini` file should be created containing the configuration of the CouchDB service that will keep the administration of the tasks and jobs, and the type of simulations that can be served. The `config.ini.dist` file can be used as a template for this.
 
-Install by calling `make install` and serve on port 9090 using `make serve`.
+Install by calling
+```
+pip install -r requirements.txt .
+```
+and serve on port 9090 using `make serve`.
 
 ## Building and deployment with Docker
 
