@@ -124,3 +124,69 @@ def test_submit_wrong_parameter():
                     'command': 'echo',
                     'arg': 'much too long this argument is'
                  })
+
+
+def test_hosts():
+    response = make_request('/hosts', 200, 'application/json')
+    obj = response.json()
+    assert_equals(1, len(obj))
+    assert_equals('slurm', list(obj.keys())[0])
+    assert_true('default' in obj['slurm'])
+    assert_equals(True, obj['slurm']['default'])
+
+
+def test_resource():
+    response = make_request('/resource', 200, 'application/json')
+    obj = response.json()
+    for resource in obj['resources']:
+        response = make_request('/resource/' + resource, 200,
+                                'application/json')
+        assert_true('featureTypes' in response.json())
+
+
+def test_schema():
+    response = make_request('/schema', 200, 'application/json')
+    obj = response.json()
+    for schema in obj['schemas']:
+        response = make_request('/schema/' + schema, 200,
+                                'application/json')
+        assert_true('id' in response.json())
+
+
+def test_delete():
+    response = make_request('/simulate/test_simulation/latest', 201,
+                            method='POST', json={
+                                'command': 'echo',
+                                'arg': 'Hello!',
+                            })
+    assert_true('location' in response.headers)
+    simulation_url = response.headers['location']
+    response = make_request(simulation_url, 200, 'application/json',
+                            base='http://localhost:9098')
+    revision = response.json()['_rev']
+    make_request(simulation_url, 409, 'application/json',
+                 base='http://localhost:9098', method='DELETE')
+    make_request(simulation_url, 200, 'application/json',
+                 params={'rev': revision},
+                 base='http://localhost:9098', method='DELETE')
+    make_request(simulation_url, 404, 'application/json',
+                 base='http://localhost:9098')
+    make_request(simulation_url, 404, 'application/json',
+                 params={'rev': revision}, base='http://localhost:9098',
+                 method='DELETE')
+
+
+def test_delete_if_match():
+    response = make_request('/simulate/test_simulation/latest', 201,
+                            method='POST', json={
+                                'command': 'echo',
+                                'arg': 'Hello!',
+                            })
+    assert_true('location' in response.headers)
+    simulation_url = response.headers['location']
+    response = make_request(simulation_url, 200, 'application/json',
+                            base='http://localhost:9098')
+    revision = response.json()['_rev']
+    make_request(simulation_url, 200, 'application/json',
+                 base='http://localhost:9098', headers={'If-Match': revision},
+                 method='DELETE')
