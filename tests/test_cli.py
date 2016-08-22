@@ -18,9 +18,7 @@ from __future__ import print_function
 
 import simcityweb.cli
 from simcityweb.cli import (confirm, dialog, choice_dialog, new_or_overwrite)
-from nose.tools import assert_equals, assert_raises, assert_true, assert_false
-import tempfile
-import os
+from pytest import raises
 
 
 class CliInput(object):
@@ -39,119 +37,109 @@ class CliInput(object):
 
 def test_confirm_positive():
     my_input = CliInput(["y"])
-    assert_equals(True, confirm("lalala",
-                  default_response=True))
-    assert_equals("lalala [Y/n]? ", my_input.messages[0])
-    assert_equals(True, confirm("lalala",
-                  default_response=False))
-    assert_equals("lalala [y/N]? ", my_input.messages[0])
+    assert confirm("lalala", default_response=True)
+    assert "lalala [Y/n]? " == my_input.messages[0]
+    assert confirm("lalala", default_response=False)
+    assert "lalala [y/N]? " == my_input.messages[0]
 
 
 def test_confirm_negative():
     my_input = CliInput(["n"])
-    assert_equals(False, confirm("lalala",
-                  default_response=True))
-    assert_equals("lalala [Y/n]? ", my_input.messages[0])
-    assert_equals(False, confirm("lalala",
-                  default_response=False))
-    assert_equals("lalala [y/N]? ", my_input.messages[0])
+    assert not confirm("lalala", default_response=True)
+    assert "lalala [Y/n]? " == my_input.messages[0]
+    assert not confirm("lalala", default_response=False)
+    assert "lalala [y/N]? " == my_input.messages[0]
 
 
 def test_confirm_empty():
     my_input = CliInput([""])
-    assert_equals(True, confirm("lalala",
-                  default_response=True))
-    assert_equals("lalala [Y/n]? ", my_input.messages[0])
-    assert_equals(False, confirm("lalala",
-                  default_response=False))
-    assert_equals("lalala [y/N]? ", my_input.messages[0])
+    assert confirm("lalala", default_response=True)
+    assert "lalala [Y/n]? " == my_input.messages[0]
+    assert not confirm("lalala", default_response=False)
+    assert "lalala [y/N]? " == my_input.messages[0]
 
 
 def test_confirm_invalid():
     my_input = CliInput(["neither", ""])
-    assert_equals(True, confirm("lalala",
-                  default_response=True))
-    assert_equals("lalala [Y/n]? ", my_input.messages[0])
-    assert_equals("Please answer yes or no. lalala [Y/n]? ",
-                  my_input.messages[1])
-    assert_equals(False, confirm("lalala",
-                  default_response=False))
-    assert_equals("lalala [y/N]? ", my_input.messages[0])
-    assert_equals("Please answer yes or no. lalala [y/N]? ",
-                  my_input.messages[1])
+    assert confirm("lalala", default_response=True)
+    assert "lalala [Y/n]? " == my_input.messages[0]
+    assert "Please answer yes or no. lalala [Y/n]? " == my_input.messages[1]
+    assert not confirm("lalala", default_response=False)
+    assert "lalala [y/N]? " == my_input.messages[0]
+    assert "Please answer yes or no. lalala [y/N]? " == my_input.messages[1]
 
 
 def test_choice_dialog():
     my_input = CliInput(["option0"])
-    assert_equals("option0", choice_dialog("opt", ("option0", "option1")))
-    assert_equals("opt ('option0', 'option1'): ", my_input.messages[0])
+    assert "option0" == choice_dialog("opt", ("option0", "option1"))
+    assert "opt ('option0', 'option1'): " == my_input.messages[0]
 
 
 def test_choice_dialog_invalid_option():
     my_input = CliInput(["option3", "option0"])
-    assert_equals("option0", choice_dialog("opt", ("option0", "option1")))
-    assert_equals("opt ('option0', 'option1'): ", my_input.messages[0])
-    assert_equals("Value 'option3' invalid. opt ('option0', 'option1'): ",
-                  my_input.messages[1])
+    assert "option0" == choice_dialog("opt", ("option0", "option1"))
+    assert "opt ('option0', 'option1'): " == my_input.messages[0]
+    assert ("Value 'option3' invalid. opt ('option0', 'option1'): " ==
+            my_input.messages[1])
 
 
 def test_choice_dialog_default_option():
     CliInput([""])
-    assert_equals("option1", choice_dialog("opt", ("option0", "option1"),
-                  default_response="option1"))
+    assert "option1" == choice_dialog("opt", ("option0", "option1"),
+                                      default_response="option1")
 
 
 def test_choice_dialog_invalid_default_option_raises():
     CliInput([""])
-    assert_raises(ValueError, choice_dialog, "opt", ("option0", "option1"),
-                  default_response="option3")
+    with raises(ValueError):
+        choice_dialog("opt", ("option0", "option1"),
+                      default_response="option3")
 
 
 def test_choice_dialog_empty_options_raises():
     CliInput([""])
-    assert_raises(ValueError, choice_dialog, "opt", [])
+    with raises(ValueError):
+        choice_dialog("opt", [])
 
 
 def test_dialog():
     my_input = CliInput(["val"])
-    assert_equals("val", dialog("opt"))
-    assert_equals("opt: ", my_input.messages[0])
+    assert "val" == dialog("opt")
+    assert "opt: " == my_input.messages[0]
 
 
 def test_dialog_invalid():
     my_input = CliInput(["", "val"])
-    assert_equals("val", dialog("opt"))
-    assert_equals("opt: ", my_input.messages[0])
-    assert_equals("Value '' invalid. opt: ", my_input.messages[1])
+    assert "val" == dialog("opt")
+    assert "opt: " == my_input.messages[0]
+    assert "Value '' invalid. opt: " == my_input.messages[1]
 
 
 def test_dialog_default():
     CliInput([""])
-    assert_equals("def", dialog("opt", "def"))
+    assert "def" == dialog("opt", "def")
 
 
 def test_dialog_default_override():
     CliInput(["faa"])
-    assert_equals("faa", dialog("opt", "def"))
+    assert "faa" == dialog("opt", "def")
 
 
-def test_new_or_overwrite_no_exist():
-    fd, filename = tempfile.mkstemp()
-    os.remove(filename)
-    assert_true(new_or_overwrite(filename))
+def test_new_or_overwrite_no_exist(tmpdir):
+    p = tmpdir.join('new_or_overwrite.txt')
+    assert not p.check()
+    assert new_or_overwrite(str(p))
 
 
-def test_new_or_overwrite_exist():
-    fd, filename = tempfile.mkstemp()
-    try:
-        my_input = CliInput([""])
-        assert_false(new_or_overwrite(filename))
-        assert_false(my_input.messages[0] is None)
-        my_input = CliInput(["n"])
-        assert_false(new_or_overwrite(filename))
-        assert_false(my_input.messages[0] is None)
-        my_input = CliInput(["y"])
-        assert_true(new_or_overwrite(filename))
-        assert_false(my_input.messages[0] is None)
-    finally:
-        os.remove(filename)
+def test_new_or_overwrite_exist(tmpdir):
+    f = tmpdir.join('new_or_overwrite.txt')
+    f.ensure(file=True)
+    my_input = CliInput([""])
+    assert not new_or_overwrite(str(f))
+    assert my_input.messages[0] is not None
+    my_input = CliInput(["n"])
+    assert not new_or_overwrite(str(f))
+    assert my_input.messages[0] is not None
+    my_input = CliInput(["y"])
+    assert new_or_overwrite(str(f))
+    assert my_input.messages[0] is not None

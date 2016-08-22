@@ -11,7 +11,8 @@ do
   echo "Waiting for job db..."
   sleep 1
 done
-echo "$(date) - connected successfully"
+TIME=`date`
+echo "$TIME - connected successfully"
 
 simcity init -u simcityadmin -p simcity &&
   exec python -m bottle scripts.app --bind 0.0.0.0:9090 -s gevent

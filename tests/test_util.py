@@ -19,61 +19,54 @@ from __future__ import print_function
 from simcityweb.util import (make_hash, error, abort, get_simulation_config,
                              get_minified_json, get_simulation_version)
 from bottle import HTTPResponse
-from nose.tools import (assert_equals, assert_raises, assert_not_equal,
-                        assert_true)
-import tempfile
+from pytest import raises
 import os
 
 
 def test_make_hash():
     for i in range(10):
-        assert_not_equal(make_hash(i), make_hash(i + 1))
-        assert_equals(make_hash(i), make_hash(i + 1 - 1))
+        assert make_hash(i) != make_hash(i + 1)
+        assert make_hash(i) == make_hash(i + 1 - 1)
 
     for a in "my str":
-        assert_not_equal(make_hash(i), make_hash(1))
-        assert_equals(make_hash(a), make_hash(chr(ord(a))))
+        assert make_hash(i) != make_hash(1)
+        assert make_hash(a) == make_hash(chr(ord(a)))
 
 
 def test_error():
     err = error(400, "message")
-    assert_equals(HTTPResponse, type(err))
-    assert_equals(400, err.status_code)
+    assert HTTPResponse == type(err)
+    assert 400 == err.status_code
 
 
 def test_abort():
-    assert_raises(HTTPResponse, abort, 400, "message")
+    with raises(HTTPResponse):
+        abort(400, "message")
 
 
-def test_minified_filename():
-    fd, path = tempfile.mkstemp(suffix='.json')
+def test_minified_filename(tmpdir):
+    f = tmpdir.join('test.json')
+    f.write('{"a": 2}')
+
+    # if minified does not exist, return full file
+    minfilename = 'test.min.json'
+    minpath = os.path.join(f.dirname, minfilename)
+
+    assert {'a': 2} == get_minified_json(f.dirname, 'test')
+
+    assert os.path.exists(minpath)
+    assert os.stat(minpath).st_size == f.size() - 1
+
+
+def test_minified_non_exist(tmpdir):
+    f = tmpdir.join("does_not_exist")
     try:
-        with open(path, 'wb') as f:
-            f.write(b'{"a": 2}')
-
-        # if minified does not exist, return full file
-        filedir, filename = os.path.split(path)
-        base = filename[:-5]
-        minfilename = base + '.min.json'
-        minpath = os.path.join(filedir, minfilename)
-
-        assert_equals({'a': 2}, get_minified_json(filedir, base))
-
-        assert_true(os.path.exists(minpath))
-        try:
-            assert_equals(os.stat(minpath).st_size, os.stat(path).st_size - 1)
-        finally:
-            os.remove(minpath)
-    finally:
-        os.remove(path)
-
-
-def test_minified_non_exist():
-    try:
-        assert_raises(FileNotFoundError, get_minified_json, "dir",
-                      "does not exist")
+        minified_error = FileNotFoundError
     except NameError:
-        assert_raises(IOError, get_minified_json, "dir", "does not exist")
+        minified_error = IOError
+
+    with raises(minified_error):
+        get_minified_json(str(f), "does not exist")
 
 
 def test_get_simulation_version():
@@ -83,24 +76,20 @@ def test_get_simulation_version():
         '1.0': {},
         'invalid': '2.0',
     }
-    assert_equals('1.0', get_simulation_version(spec, '1.0'))
-    assert_equals('1.0', get_simulation_version(spec, 'stable'))
-    assert_raises(KeyError, get_simulation_version, spec, 'no_exist')
-    assert_raises(ValueError, get_simulation_version, spec, 'latest')
-    assert_raises(ValueError, get_simulation_version, spec, 'invalid')
+    assert '1.0' == get_simulation_version(spec, '1.0')
+    assert '1.0' == get_simulation_version(spec, 'stable')
+    raises(KeyError, get_simulation_version, spec, 'no_exist')
+    raises(ValueError, get_simulation_version, spec, 'latest')
+    raises(ValueError, get_simulation_version, spec, 'invalid')
 
 
-def test_get_simulation_config():
-    fd, path = tempfile.mkstemp(suffix='.json')
-    filedir, filename = os.path.split(path)
-    base = filename[:-5]
+def test_get_simulation_config(tmpdir):
     spec = '{"latest": "1.0", "1.0": {}, "invalid": "2.0"}'
-    with os.fdopen(fd, 'w') as f:
-        f.write(spec)
+    f = tmpdir.join('test.json')
+    f.write(spec)
 
-    assert_equals('1.0', get_simulation_config(base, '1.0', filedir)[1])
-    assert_equals('1.0', get_simulation_config(base, 'latest', filedir)[1])
-    assert_raises(HTTPResponse, get_simulation_config,
-                  'non_exist_sim', 'latest', filedir)
-    assert_raises(HTTPResponse, get_simulation_config,
-                  'base', 'invalid', filedir)
+    assert '1.0' == get_simulation_config('test', '1.0', f.dirname)[1]
+    assert '1.0' == get_simulation_config('test', 'latest', f.dirname)[1]
+    raises(HTTPResponse, get_simulation_config, 'non_exist_sim', 'latest',
+           f.dirname)
+    raises(HTTPResponse, get_simulation_config, 'base', 'invalid', f.dirname)

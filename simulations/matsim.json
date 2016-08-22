@@ -99,7 +99,7 @@
   "0.5": {
     "command": "~/bangalore-matsim/matsim.sh",
     "parallelism": "*",
-    "resourceTypeUrl": "explore/resource/matsim",
+    "resourceTypeUrl": "/explore/resource/matsim",
     "form": [
         "ensemble", 
         "simulation", 
@@ -159,7 +159,7 @@
             "type": "array",
             "startEmpty": true,
             "items": {
-                "$ref": "http://localhost/explore/schema/point2d"
+                "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
             },
             "description": "Please add one or more fire stations to the map",
             "validationMessage": "Please add at least one fire station"
@@ -170,7 +170,7 @@
             "maxItems": 1,
             "type": "array",
             "items": {
-                "$ref": "http://localhost/explore/schema/point2d"
+                "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
             },
             "description": "The fire",
             "validationMessage": "Please add exactly one (1) fire to the map"

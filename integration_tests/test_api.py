@@ -1,5 +1,4 @@
 import requests
-from nose.tools import assert_equals, assert_true
 import time
 
 host = 'http://localhost:9098/explore'
@@ -9,15 +8,14 @@ def make_request(path, status_code, content_type=None, method='GET', base=host,
                  **kwargs):
     response = requests.request(method, base + path, **kwargs)
     if isinstance(status_code, int):
-        assert_equals(status_code, response.status_code)
+        assert status_code == response.status_code
     else:
-        assert_true(response.status_code in status_code)
+        assert response.status_code in status_code
     if content_type is not None:
-        assert_true(response.headers['content-type'].lower()
-                    .startswith(content_type.lower()),
-                    msg='Response content type "{0}" does not match expected '
-                        'content type "{1}".'
-                    .format(response.headers['content-type'], content_type))
+        response_type = response.headers['content-type'].lower()
+        assert response_type.startswith(content_type.lower()), (
+                'Response content type "{0}" does not match expected '
+                'content type "{1}".'.format(response_type, content_type))
     return response
 
 
@@ -40,10 +38,10 @@ def test_doc():
 def test_simulations():
     response = make_request('/simulate', 200, 'application/json')
     obj = response.json()
-    assert_true('test_simulation' in obj)
-    assert_true('0.1' in obj['test_simulation']['versions'])
-    assert_true('0.2' in obj['test_simulation']['versions'])
-    assert_true('latest' in obj['test_simulation']['versions'])
+    assert 'test_simulation' in obj
+    assert '0.1' in obj['test_simulation']['versions']
+    assert '0.2' in obj['test_simulation']['versions']
+    assert 'latest' in obj['test_simulation']['versions']
 
 
 def test_simulation():
@@ -52,7 +50,7 @@ def test_simulation():
 
     response_0_2 = make_request('/simulate/test_simulation/0.2', 200,
                                 'application/json')
-    assert_equals(response_latest.content, response_0_2.content)
+    assert response_latest.content == response_0_2.content
 
 
 def test_wrong_simulation():
@@ -69,12 +67,12 @@ def test_submit():
                                 'command': 'echo',
                                 'arg': 'Hello!',
                             })
-    assert_true('location' in response.headers)
+    assert 'location' in response.headers
     simulation_url = response.headers['location']
     response = make_request(simulation_url, 200, 'application/json',
                             base='http://localhost:9098')
     obj = response.json()
-    assert_equals('echo', obj['input']['command'])
+    assert 'echo' == obj['input']['command']
     time.sleep(3)
     response = make_request(simulation_url, 200, 'application/json',
                             base='http://localhost:9098')
@@ -82,18 +80,18 @@ def test_submit():
     print(obj)
     response = make_request('/view/totals', 200, 'application/json')
     print(response.json())
-    assert_true(obj['lock'] > 0)   
-    assert_true(obj['done'] > 0)   
-    assert_equals(2, len(obj['files']))
-    assert_true('stderr.txt' in obj['files'])
-    assert_true('stdout.txt' in obj['files'])
-    assert_equals('text/plain', obj['files']['stderr.txt']['content_type'])
-    assert_equals(0, obj['files']['stderr.txt']['length'])
-    assert_equals('text/plain', obj['files']['stdout.txt']['content_type'])
-    assert_equals(len('Hello!\n'), obj['files']['stdout.txt']['length'])
+    assert obj['lock'] > 0
+    assert obj['done'] > 0
+    assert 2 == len(obj['files'])
+    assert 'stderr.txt' in obj['files']
+    assert 'stdout.txt' in obj['files']
+    assert 'text/plain' == obj['files']['stderr.txt']['content_type']
+    assert 0 == obj['files']['stderr.txt']['length']
+    assert 'text/plain' == obj['files']['stdout.txt']['content_type']
+    assert len('Hello!\n') == obj['files']['stdout.txt']['length']
     stdout = make_request('/simulation/{0}/stdout.txt'.format(obj['_id']), 200,
                           'text/plain')
-    assert_equals('Hello!\n', stdout.text)
+    assert 'Hello!\n' == stdout.text
 
 
 def test_submit_with_params():
@@ -129,10 +127,10 @@ def test_submit_wrong_parameter():
 def test_hosts():
     response = make_request('/hosts', 200, 'application/json')
     obj = response.json()
-    assert_equals(1, len(obj))
-    assert_equals('slurm', list(obj.keys())[0])
-    assert_true('default' in obj['slurm'])
-    assert_equals(True, obj['slurm']['default'])
+    assert 1 == len(obj)
+    assert 'slurm' == list(obj.keys())[0]
+    assert 'default' in obj['slurm']
+    assert obj['slurm']['default']
 
 
 def test_resource():
@@ -141,7 +139,7 @@ def test_resource():
     for resource in obj['resources']:
         response = make_request('/resource/' + resource, 200,
                                 'application/json')
-        assert_true('featureTypes' in response.json())
+        assert 'featureTypes' in response.json()
 
 
 def test_schema():
@@ -150,7 +148,7 @@ def test_schema():
     for schema in obj['schemas']:
         response = make_request('/schema/' + schema, 200,
                                 'application/json')
-        assert_true('id' in response.json())
+        assert 'id' in response.json()
 
 
 def test_delete():
@@ -159,7 +157,7 @@ def test_delete():
                                 'command': 'echo',
                                 'arg': 'Hello!',
                             })
-    assert_true('location' in response.headers)
+    assert 'location' in response.headers
     simulation_url = response.headers['location']
     response = make_request(simulation_url, 200, 'application/json',
                             base='http://localhost:9098')
@@ -182,7 +180,7 @@ def test_delete_if_match():
                                 'command': 'echo',
                                 'arg': 'Hello!',
                             })
-    assert_true('location' in response.headers)
+    assert 'location' in response.headers
     simulation_url = response.headers['location']
     response = make_request(simulation_url, 200, 'application/json',
                             base='http://localhost:9098')

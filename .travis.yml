@@ -18,4 +18,4 @@ install:
   - pip install -U pip
   - pip install -r requirements.txt -r test_requirements.txt .
 script:
-  - nosetests $TESTS
+  - pytest $TESTS
