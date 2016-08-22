@@ -97,7 +97,8 @@
     }
   },
   "0.5": {
-    "command": "~/bangalore-matsim-0.4/matsim.py",
+    "command": "~/bangalore-matsim/matsim.sh",
+    "parallelism": "*",
     "resourceTypeUrl": "explore/resource/matsim",
     "form": [
         "ensemble", 
@@ -135,22 +136,22 @@
     "required": [ "ensemble", "simulation", "populationSampleFactor", "fireStations", "fires" ],
     "properties": {
         "ensemble": {
-            "minLength": "1",
+            "minLength": 1,
             "type": "string",
             "title": "Ensemble Name"
         },
         "simulation": {
-            "minLength": "1",
+            "minLength": 1,
             "type": "string",
             "title": "Scenario Name"
         },
         "populationSampleFactor": {
             "type": "number",
             "minimum": 0,
-            "maximum": 100,
-            "default": 1,
-            "title": "Commute Percentage",
-            "description": "percentage of the population (totalling 8.5 million) that commutes"
+            "maximum": 1,
+            "default": 0.1,
+            "title": "Commute factor",
+            "description": "portion of the population (totalling 8.5 million) that commutes"
         },
         "fireStations": {
             "title": "Fire stations",
