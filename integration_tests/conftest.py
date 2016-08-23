@@ -2,29 +2,20 @@ import subprocess
 import time
 import pytest
 
-all_tests_passed = True
 
-
-@pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    global all_tests_passed
-    # execute all other hooks to obtain the report object
-    outcome = yield
-    all_tests_passed &= not outcome.get_result().failed
-
-
-@pytest.fixture(scope="module", autouse=True)
-def docker_compose():
-    global all_tests_passed
+@pytest.fixture(scope="session", autouse=True)
+def docker_compose(request):
+    """ Run docker-compose """
     print("building docker images and starting containers")
     compose = subprocess.Popen(['docker-compose', 'up', '--build', '-d'],
                                cwd='integration_tests/docker')
     compose.wait()
     assert 0 == compose.returncode
     time.sleep(10)
+
     yield
 
-    if not all_tests_passed:
+    if request.node.session.testsfailed > 0:
         print("docker logs")
         subprocess.Popen(['docker-compose', 'logs'],
                          cwd='integration_tests/docker').wait()
@@ -36,4 +27,4 @@ def docker_compose():
     subprocess.Popen(['docker-compose', 'rm', '-f'],
                      cwd='integration_tests/docker').wait()
 
-    assert all_tests_passed
+    assert request.node.session.testsfailed == 0

@@ -1,7 +1,7 @@
 import requests
 import time
 
-host = 'http://localhost:9098/explore'
+host = 'http://127.0.0.1:9098/explore'
 
 
 def make_request(path, status_code, content_type=None, method='GET', base=host,

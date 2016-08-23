@@ -40,10 +40,10 @@ pip install -r test_requirements.txt
 ```
 Run unit tests with
 ```
-pytest -q tests
+pytest tests
 ```
 and integration tests with
 ```
-pytest -q integration_tests
+pytest integration_tests
 ```
 The last command requires docker-compose to be installed. To run custom tests, go to the `integration_tests/docker` folder and run `docker-compose up --build`. For more instructions see `integration_tests/docker/README.md`.

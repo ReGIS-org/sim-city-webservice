@@ -1,4 +1,4 @@
-# pyxenon
+# sim-city-webservice
 #
 # Copyright 2015 Netherlands eScience Center
 #
@@ -21,11 +21,17 @@ import os
 import logging
 import pytest
 
-# flake8 is logging is really verbose. disable.
-logging.disable(logging.CRITICAL)
+
+@pytest.fixture
+def disable_logging():
+    # flake8 is logging is really verbose. disable.
+    logging.disable(logging.CRITICAL)
+    yield
+    logging.disable(logging.NOTSET)
 
 
-@pytest.fixture(params=['tests', 'scripts', 'xenon', 'setup.py'])
+@pytest.fixture(params=['tests', 'scripts', 'simcityweb', 'integration_tests',
+                        'setup.py'])
 def flake8_filenames(request):
     """ Yield filenames for flake8 to run over recursively, given files and
     directories. """
@@ -39,7 +45,8 @@ def flake8_filenames(request):
         yield [request.param]
 
 
-def test_flakes8(flake8_filenames, capsys):
+@pytest.mark.usefixtures("disable_logging")
+def test_flakes8(flake8_filenames):
     """ Test a single file with flake8. """
     if len(flake8_filenames) > 0:
         report = flake8.get_style_guide().check_files(flake8_filenames)

@@ -132,8 +132,7 @@ def test_new_or_overwrite_no_exist(tmpdir):
 
 
 def test_new_or_overwrite_exist(tmpdir):
-    f = tmpdir.join('new_or_overwrite.txt')
-    f.ensure(file=True)
+    f = tmpdir.ensure('new_or_overwrite.txt')
     my_input = CliInput([""])
     assert not new_or_overwrite(str(f))
     assert my_input.messages[0] is not None

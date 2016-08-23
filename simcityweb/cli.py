@@ -25,7 +25,7 @@ _input_mechanism = input
 
 
 def confirm(message, default_response=True):
-    ''' Provide a command-line yes-no question for the user. '''
+    """ Provide a command-line yes-no question for the user. """
     truthy = ['y', 'yes']
     falsy = ['n', 'no']
     if default_response:
@@ -37,16 +37,16 @@ def confirm(message, default_response=True):
 
     possible_answers = truthy + falsy
     response = _input_mechanism('{0} [{1}]? '
-                          .format(message, default_message)).lower()
+                                .format(message, default_message)).lower()
     while response not in possible_answers:
         response = _input_mechanism('Please answer yes or no. {0} [{1}]? '
-                             .format(message, default_message)).lower()
+                                    .format(message, default_message)).lower()
 
     return response in truthy
 
 
 def dialog(message, default_response=None):
-    ''' Provide a command-line dialog for the user. '''
+    """ Provide a command-line dialog for the user. """
     if default_response is None:
         response = _input_mechanism('{0}: '.format(message))
         while response == '':
@@ -62,7 +62,7 @@ def dialog(message, default_response=None):
 
 
 def choice_dialog(message, options, default_response=None):
-    ''' Provide a command-line dialog with fixed options for the user. '''
+    """ Provide a command-line dialog with fixed options for the user. """
     if len(options) == 0:
         raise ValueError("Cannot choose from empty options")
     elif len(options) == 1:
@@ -98,8 +98,8 @@ def choice_dialog(message, options, default_response=None):
 
 
 def new_or_overwrite(path, message=None, default_response=False):
-    ''' Either given file does not exist, or the user has to confirm whether
-        to overwrite it. '''
+    """ Either given file does not exist, or the user has to confirm whether
+        to overwrite it. """
     directory, filename = os.path.split(path)
     if message is None:
         message = "{0} exists, overwrite".format(filename)
