@@ -2,6 +2,9 @@
 
 from distutils.core import setup
 
+simcity_url = ('git+ssh://git@github.com/indodutch/sim-city-client.git'
+               '@develop#egg=simcity-0.4')
+
 setup(name='simcityweb',
       version='0.1',
       description='Python SIM-CITY web service.',
@@ -9,9 +12,9 @@ setup(name='simcityweb',
       author_email='j.borgdorff@esciencecenter.nl',
       url='https://esciencecenter.nl/projects/sim-city/',
       packages=['simcityweb'],
-      install_requires=["gevent", "simcity[xenon]>=0.4", "bottle", "accept-types"],
+      install_requires=["gevent", "bottle", "accept-types", 'simcity[xenon]'],
       extras_require={
           'test': ['pytest', 'pytest-flake8'],
       },
-      dependency_links = ['http://github.com/indodutch/sim-city-client/tarball/develop#egg=simcity-0.4'],
+      dependency_links=[simcity_url],
       )
