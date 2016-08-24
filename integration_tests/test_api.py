@@ -19,6 +19,11 @@ def make_request(path, status_code, content_type=None, method='GET', base=host,
     return response
 
 
+def get_revision(simulation_url):
+    return make_request(simulation_url, 200, 'application/json',
+                        base='http://localhost:9098').json()['_rev']
+
+
 def test_root():
     make_request('', 200, 'application/json')
     make_request('/', 200, 'application/json')
@@ -159,14 +164,23 @@ def test_delete():
                             })
     assert 'location' in response.headers
     simulation_url = response.headers['location']
-    response = make_request(simulation_url, 200, 'application/json',
-                            base='http://localhost:9098')
-    revision = response.json()['_rev']
+    revision = get_revision(simulation_url)
     make_request(simulation_url, 409, 'application/json',
                  base='http://localhost:9098', method='DELETE')
-    make_request(simulation_url, 200, 'application/json',
-                 params={'rev': revision},
-                 base='http://localhost:9098', method='DELETE')
+
+    response = make_request(simulation_url, (200, 409), 'application/json',
+                            params={'rev': revision},
+                            base='http://localhost:9098', method='DELETE')
+    tries = 1
+    while tries < 3 and response.status_code == 409:
+        tries += 1
+        revision = get_revision(simulation_url)
+        response = make_request(simulation_url, (200, 409), 'application/json',
+                                params={'rev': revision},
+                                base='http://localhost:9098', method='DELETE')
+
+    assert response.status_code == 200
+
     make_request(simulation_url, 404, 'application/json',
                  base='http://localhost:9098')
     make_request(simulation_url, 404, 'application/json',
@@ -182,9 +196,16 @@ def test_delete_if_match():
                             })
     assert 'location' in response.headers
     simulation_url = response.headers['location']
-    response = make_request(simulation_url, 200, 'application/json',
-                            base='http://localhost:9098')
-    revision = response.json()['_rev']
-    make_request(simulation_url, 200, 'application/json',
-                 base='http://localhost:9098', headers={'If-Match': revision},
-                 method='DELETE')
+    revision = get_revision(simulation_url)
+    response = make_request(simulation_url, (200, 409), 'application/json',
+                            base='http://localhost:9098', method='DELETE',
+                            headers={'If-Match': revision})
+    tries = 1
+    while tries < 3 and response.status_code == 409:
+        tries += 1
+        revision = get_revision(simulation_url)
+        response = make_request(simulation_url, (200, 409), 'application/json',
+                                base='http://localhost:9098', method='DELETE',
+                                headers={'If-Match': revision})
+
+    assert response.status_code == 200
