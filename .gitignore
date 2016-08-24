@@ -8,3 +8,4 @@
 *.min.json
 /.cache/
 /.tox/
+/MANIFEST
