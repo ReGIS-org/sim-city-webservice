@@ -9,5 +9,9 @@ setup(name='simcityweb',
       author_email='j.borgdorff@esciencecenter.nl',
       url='https://esciencecenter.nl/projects/sim-city/',
       packages=['simcityweb'],
-      install_requires=["gevent", "simcity[xenon]", "bottle", "accept-types"],
+      install_requires=["gevent", "simcity[xenon]>=0.4", "bottle", "accept-types"],
+      extras_require={
+          'test': ['pytest', 'pytest-flake8'],
+      },
+      dependency_links = ['http://github.com/indodutch/sim-city-client/tarball/develop#egg=simcity-0.4'],
       )

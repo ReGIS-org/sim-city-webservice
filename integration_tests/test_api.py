@@ -14,8 +14,8 @@ def make_request(path, status_code, content_type=None, method='GET', base=host,
     if content_type is not None:
         response_type = response.headers['content-type'].lower()
         assert response_type.startswith(content_type.lower()), (
-                'Response content type "{0}" does not match expected '
-                'content type "{1}".'.format(response_type, content_type))
+            'Response content type "{0}" does not match expected '
+            'content type "{1}".'.format(response_type, content_type))
     return response
 
 
@@ -114,13 +114,13 @@ def test_submit_missing_parameter():
 def test_submit_wrong_parameter():
     make_request('/simulate/test_simulation/latest', 412, method='POST',
                  json={
-                    'command': 'tr',
-                    'arg': '\n'
+                     'command': 'tr',
+                     'arg': '\n'
                  })
     make_request('/simulate/test_simulation/latest', 412, method='POST',
                  json={
-                    'command': 'echo',
-                    'arg': 'much too long this argument is'
+                     'command': 'echo',
+                     'arg': 'much too long this argument is'
                  })
 
 

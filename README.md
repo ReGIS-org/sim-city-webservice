@@ -36,14 +36,14 @@ Before running again, run
 
 Install test dependencies with
 ```
-pip install -r test_requirements.txt
+pip install -U ".[test]"
 ```
 Run unit tests with
 ```
 pytest tests
 ```
-and integration tests with
+and all tests with
 ```
-pytest integration_tests
+pytest --flake8
 ```
 The last command requires docker-compose to be installed. To run custom tests, go to the `integration_tests/docker` folder and run `docker-compose up --build`. For more instructions see `integration_tests/docker/README.md`.
