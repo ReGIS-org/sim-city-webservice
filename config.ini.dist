@@ -1,4 +1,12 @@
+[Simulations]
+# Specify simulation properties
+# maximum number of jobs to run simultaneously
+max_jobs = 4
+# default host to submit to, configured in the myhost-host section
+default_host = myhost
+
 [task-db]
+# CouchDB task database configuration
 url = http://local.url:5984
 public_url = https://couch.example.com/
 username = myuser
@@ -6,18 +14,49 @@ password = mypassword
 database = mytaskdatabase
 
 [job-db]
+# CouchDB job database configuration. Remove this section
+# to use the task database for storing jobs.
 url = http://local.url:5984
 public_url = https://couch.example.com/
 username = myuser
 password = mypassword
 database = myjobdatabase
 
-[mycluster-host]
-path = path/to/submitscript
-script = submitscript.sh
-host = myhostname
-method = ssh
+# CouchDB configuration database. Uncomment to use get additional
+# configuration. Alternatively, these settings can be set as environment
+# variables $SIMCITY_CONFIG_URL, $SIMCITY_CONFIG_DB, $SIMCITY_CONFIG_USER,
+# $SIMCITY_CONFIG_PASSWORD.
+#[config-db]
+#url = https://couch.example.com
+#database = configurator
+#username = priviligeduser
+#password = priviligedpassword
 
-[Simulations]
-max_jobs = 4
-default_host = mycluster
+[webdav]
+# WebDAV configuration for storing files. Remove this
+# section to have attachments stored in the task database.
+url = http://host/webdav/path
+username = webdavusername
+password = webdavpassword
+# Uncomment the next line to disable webdav.
+# enabled = false
+
+[mycluster-host]
+# Configuration of a single job host, using Xenon
+path = path/to/submitscript
+script = run.sh
+
+# Schema defines what submission system the host uses.
+host = slurm://user@myhostname
+
+# private SSH key to log in to the given host, defaults to ~/.ssh/id_rsa
+# private-key = ~/.ssh/other_id_rsa
+
+# Password of either the host, or if the private key is specified, of the
+# private key.
+# password = mypassword
+
+# Method is either ssh or xenon.
+method = xenon
+# time in minutes: 1 day
+max_time = 1440
