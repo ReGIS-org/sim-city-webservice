@@ -18,5 +18,5 @@ do
 done
 echo "$(date) - connected successfully"
 
-python env/src/simcity/scripts/createDatabase.py ${COUCHDB_USERNAME:-docker} -p ${COUCHDB_PASSWORD:-docker} &&
+simcity init -u ${COUCHDB_USERNAME:-docker} -p ${COUCHDB_PASSWORD:-docker} &&
   exec python -m bottle scripts.app --bind 0.0.0.0:9090 -s gevent

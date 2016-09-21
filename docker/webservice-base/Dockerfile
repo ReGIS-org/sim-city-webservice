@@ -21,7 +21,7 @@ RUN virtualenv env \
   && pip install -U pip \
   && git checkout develop \
   && simcity_client_commit="d6aab4fced5072a69589a680d50095a7fc9dd051" \
-     make install
+     pip install -r requirements.txt .
 
 USER root
 COPY /start.sh /
