@@ -16,22 +16,20 @@ password = {{password}}
 database = simcity_jobs
 ssl_verify = {{ssl-verify}}
 
-[osmium]
-host = http://${OSMIUM_HOST}
-
 [Simulations]
 max_jobs = 4
 path = simulations
 default_host = {{default-host}}
 
-{{#osmium-hosts}}
+{{#xenon-hosts}}
 [{{name}}-host]
 script = {{script}}
 path = {{path}}
-launcher = {{name}}
+host = {{host}}
 max_time = {{max_time}}  # minutes
-method = osmium
-{{/osmium-hosts}}
+method = xenon
+scheduler-property-xenon.adaptors.slurm.ignore.version = {{ignore_version}}
+{{/xenon-hosts}}
 
 {{#ssh-hosts}}
 [{{name}}-host]
