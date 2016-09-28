@@ -139,19 +139,10 @@ def simulate_name_version(name, version=None):
         sim['additionalProperties'] = False
         simcity.parse_parameters(query, sim)
     except HTTPResponse as ex:
-        print("Encountered HTTPResponse: ", ex.message)
-        print("Schema: ", sim)
-        print("Request: ", query)
         return ex
     except ValueError as ex:
-        print("Encountered HTTPReValueErrorsponse: ", ex.message)
-        print("Schema: ", sim)
-        print("Request: ", query)
         return error(412, str(ex))
     except EnvironmentError as ex:
-        print("Encountered EnvironmentError: ", ex.message)
-        print("Schema: ", sim)
-        print("Request: ", query)
         return error(500, ex.message)
 
     task_props = {
@@ -268,7 +259,7 @@ def get_attachment(id, attachment):
     if attachment in task.attachments:
         url = simcity.get_task_database().url.rstrip('/')
 
-        if couch_cfg.public_url is not None: 
+        if couch_cfg.public_url is not None:
             url = couch_cfg.public_url
 
         response.status = 302  # temporary redirect
