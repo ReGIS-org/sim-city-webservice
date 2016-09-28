@@ -1,32 +1,28 @@
-FROM python:2.7
+FROM alpine:3.4
 MAINTAINER Joris Borgdorff <j.borgdorff@esciencecenter.nl>
 
 # install requirements
-RUN apt-get update -y && apt-get install -y git && apt-get install -y default-jdk
+RUN apk add --no-cache openjdk7-jre python python-dev py-pip git build-base curl && \
+  pip install virtualenv
 
-RUN groupadd -r simcity && useradd -d /var/lib/simcity -g simcity simcity \
-  && mkdir /var/lib/simcity \
-  && chown -R simcity:simcity /var/lib/simcity
+RUN adduser -D simcity
 
 USER simcity
-# Variable is a workaround to disable cache from this point forward
-RUN simcity_commit="646f008914e5b3811e14751e698138bfaab8501e" \
-  git clone https://github.com/NLeSC/sim-city-webservice.git \
-            /var/lib/simcity/sim-city-webservice
+RUN git clone https://github.com/indodutch/sim-city-webservice.git \
+            /home/simcity/sim-city-webservice ################
 
-WORKDIR /var/lib/simcity/sim-city-webservice
+WORKDIR /home/simcity/sim-city-webservice
 
 RUN virtualenv env \
   && . env/bin/activate \
   && pip install -U pip \
-  && git checkout develop \
-  && simcity_client_commit="d6aab4fced5072a69589a680d50095a7fc9dd051" \
-     pip install -r requirements.txt .
+  && pip install -r requirements.txt
 
 USER root
-COPY /start.sh /
-RUN chown simcity:simcity /start.sh && chmod +x /start.sh
+COPY start.sh /start.sh
+RUN chown -R simcity:simcity /home/simcity
 
 USER simcity
 EXPOSE 9090
+ENTRYPOINT ["/bin/sh"]
 CMD ["/start.sh"]
