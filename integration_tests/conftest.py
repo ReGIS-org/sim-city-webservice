@@ -7,6 +7,11 @@ import pytest
 def docker_compose(request):
     """ Run docker-compose """
     print("building docker images and starting containers")
+    buildbase = subprocess.Popen(['docker', 'build', '-t',
+                                  'simcity-webservice-base', '.'])
+    buildbase.wait()
+    assert 0 == buildbase.returncode
+
     compose = subprocess.Popen(['docker-compose', 'up', '--build', '-d'],
                                cwd='integration_tests/docker')
     compose.wait()
@@ -26,5 +31,7 @@ def docker_compose(request):
 
     subprocess.Popen(['docker-compose', 'rm', '-f'],
                      cwd='integration_tests/docker').wait()
+
+    subprocess.Popen(['docker', 'rmi', '-f', 'simcity-webservice-base']).wait()
 
     assert request.node.session.testsfailed == 0
