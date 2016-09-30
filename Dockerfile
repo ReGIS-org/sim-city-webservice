@@ -24,7 +24,7 @@ RUN virtualenv env \
   && pip install -r requirements.txt
 
 USER root
-COPY start.sh /start.sh
+COPY ./start.sh /home/simcity/start.sh
 RUN chown -R simcity:simcity /home/simcity
 
 USER simcity
