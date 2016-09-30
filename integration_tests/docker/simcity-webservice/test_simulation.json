@@ -1,0 +1,23 @@
+{
+  "latest": "0.2",
+  "0.1": {},
+  "0.2": {
+    "type": "object",
+    "command": "~/simulation.py",
+    "arguments": ["$command", "$arg"],
+    "parallelism": 1,
+    "properties": {
+      "command": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 32
+      },
+      "arg": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 10
+      }
+    },
+    "required": ["command", "arg"]
+  }
+}

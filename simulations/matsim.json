@@ -1,53 +1,180 @@
 {
-  "latest": "0.3",
+  "latest": "0.5",
   "stable": "0.3",
   "0.1": {
     "command": "~/sim-city-client/simulations/matsim.py",
-    "parameters": [
-      {
-        "name": "model",
-        "type": "choice",
-        "choices": ["tutorial", "blr"],
-        "default": "tutorial",
-        "dtype": "str",
-        "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"
-      }
-    ]
+    "type": "object",
+    "required": [ "model" ],
+    "properties": {
+      "model": {
+          "enum": ["tutorial", "blr"],
+          "default": "tutorial",
+          "description": "model to run, specified in $MATSIM/config/$MODEL/config.xml"
+        }
+    }
   },
   "0.2": {
     "command": "~/bangalore-matsim-0.2/scripts/matsim.py",
-    "parameters": [
-      {
+    "required": [ "commute-percentage" ],
+    "properties": {
+      "commute-percentage": {
         "title": "commute percentage",
-        "name": "commute-percentage",
-        "type": "interval",
-        "min": "0",
-        "max": "100",
-        "default": "5",
-        "dtype": "float",
-        "description": "percentage of the population (totalling 8.5 million) that commutes"
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 5
       }
-    ]
+    }
   },
   "0.3": {
     "command": "~/bangalore-matsim-0.3/matsim.py",
-    "parameters": [
-      {
+    "required": [ "name", "commute-percentage" ],
+    "properties": {
+      "name": {
         "title": "scenario name",
-        "name": "name",
-        "type": "str",
-        "min_length": "3"        
+        "type": "string",
+        "minLength": 3
       },
-      {
+      "commute-percentage": {
         "title": "commute percentage",
-        "name": "commute-percentage",
-        "type": "interval",
-        "min": "0",
-        "max": "100",
-        "default": "5",
-        "dtype": "float",
-        "description": "percentage of the population (totalling 8.5 million) that commutes"
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 5
       }
-    ]
+    }
+  },
+  "0.4": {
+    "command": "~/bangalore-matsim-0.4/matsim.py",
+    "type": "object",
+    "required": [ "ensemble", "simulation", "populationSampleFactor", "fireStations", "fires" ],
+    "properties": {
+      "ensemble": {
+        "title": "ensemble name",
+        "type": "string",
+        "minLength": 1,
+        "default": "none"
+      },
+      "simulation": {
+        "title": "scenario name",
+        "type": "string",
+        "minLength": 1
+      },
+      "populationSampleFactor": {
+        "title": "commute percentage",
+        "description": "percentage of the population (totalling 8.5 million) that commutes",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 1
+      },
+      "fireStations": {
+        "title": "Fire stations",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "allOf": [
+            { "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d" },
+            { "properties": {
+                "name": { "type": "string" }
+            }}
+          ]
+        },
+        "icon": "images/firestation.png"
+      },
+      "fires": {
+        "title": "Fire",
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
+        },
+        "icon": "images/fire.png"
+      }
+    }
+  },
+  "0.5": {
+    "command": "~/bangalore-matsim/matsim.sh",
+    "parallelism": "*",
+    "resourceTypeUrl": "/explore/resource/matsim",
+    "form": [
+        "ensemble", 
+        "simulation", 
+        "populationSampleFactor",
+        {
+            "key": "fireStations",
+            "startEmpty": true,
+            "add": null,
+            "remove": null,
+            "type": "layer",
+            "layer": "matsim",
+            "featureId": "FireStation",
+            "items": [
+                {
+                    "type": "point2d"
+                }
+            ]
+        }, 
+        {
+            "key": "fires",
+            "startEmpty": true,
+            "add": null,
+            "remove": null,
+            "type": "layer",
+            "layer": "matsim",
+            "featureId": "Fire",
+            "items": [
+                {
+                    "type": "point2d"
+                }
+            ]
+        }
+    ],
+    "required": [ "ensemble", "simulation", "populationSampleFactor", "fireStations", "fires" ],
+    "properties": {
+        "ensemble": {
+            "minLength": 1,
+            "type": "string",
+            "title": "Ensemble Name"
+        },
+        "simulation": {
+            "minLength": 1,
+            "type": "string",
+            "title": "Scenario Name"
+        },
+        "populationSampleFactor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.1,
+            "title": "Commute factor",
+            "description": "portion of the population (totalling 8.5 million) that commutes"
+        },
+        "fireStations": {
+            "title": "Fire stations",
+            "minItems": 0,
+            "type": "array",
+            "startEmpty": true,
+            "items": {
+                "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
+            },
+            "description": "Please add one or more fire stations to the map",
+            "validationMessage": "Please add at least one fire station"
+        },
+        "fires": {
+            "title": "Fire",
+            "minItems": 1,
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+                "$ref": "https://simcity.amsterdam-complexity.nl/schema/point2d"
+            },
+            "description": "The fire",
+            "validationMessage": "Please add exactly one (1) fire to the map"
+        }
+    }
   }
 }

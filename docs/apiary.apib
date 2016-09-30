@@ -1,0 +1,462 @@
+FORMAT: 1A
+HOST: https://simcity.amsterdam-complexity.nl/explore
+
+# SIM-CITY webservice
+
+The [SIM-CITY webservice](http://github.com/NLeSC/sim-city-webservice) starts
+simulations and jobs using the
+[SIM-CITY client](http://github.com/NLeSC/sim-city-client).
+
+# Group API
+
+# API specification [GET /]
+Swagger 2.0 API schema.
+
++ Response 200 (application/json)
+
+# API documentation [GET /doc]
+This page, or with another `Accept` header, the raw API Blueprint (text/markdown) or Swagger (application/json) documentation.
+
+
++ Request web page
+    + Headers
+
+            Accept: text/html
+
++ Request raw API Blueprint
+    + Headers
+
+            Accept: text/markdown
+
++ Request swagger
+    + Headers
+
+            Accept: application/json
+
+
++ Response 200
++ Response 406 (application/json)
+
+        {"error": "documentation type [type] not found, choose between [options]"}
+
+# Group Jobs
+
+## Submit job [POST /job{?host}]
+Start a job. Unless host is given, start the job on the default host.
+
++ Parameters
+    + host (string) ... Host to start job on; one of the hosts given in /hosts.
+
++ Response 201 (application/json)
+    + Attributes
+        + `_id`: `job_hostname-uuid-seconds` (string) - job id
+        + `batch_id`: 103024 (string) - job id according to the queueing system
+        + hostname: example.com (string) - hostname of the queueing system it was submitted to
+
++ Response 409
++ Response 502
++ Response 503
+
+## Configured hosts [GET /hosts]
+Retrieve hosts configured under the webservice with basic (optional) metadata.
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "host1": {"default": true},
+                "host2": {}
+            }
+
+# Group Simulations
+
+## Simulation engines [GET /simulate]
+Get the names of the simulation engines configured in the webservice.
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "simulation1": {"name": "simulation1", "versions": ["0.1", "latest"]},
+                "simulation2": {"name": "simulation1", "versions": ["0.1", "1.0", ""latest", "stable"]}
+            }
+
++ Response 500 (application/json)
+    + Attributes
+        + error: simulation malconfigured on server (string) - error message
+
+## Simulation engine versions [GET /simulate/{name}]
+Get the versions of a simulation engine and their configurations.
+
++ Parameters
+    + name (string) ... Name of the simulation engine
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "name": "simulation1",
+                "versions": ["0.1", "latest"]
+            }
+
++ Response 400 (application/json)
+    + Attributes
+        + error: simulation name is malformed (string) - error message
+
++ Response 404 (application/json)
+    + Attributes
+        + error: Simulation 'sim3' not found. (string) - error message
+
++ Response 500 (application/json)
+    + Attributes
+        + error: simulation malconfigured on server (string) - error message
+
+## Specific simulation engine [/simulate/{name}/{version}]
+
++ Parameters
+    + name (string) ... Name of the simulation engine
+    + version (string) ... Simulation engine version. This may include
+version references like "latest" or "stable".
+
+
+### Configuration [GET]
+Get the configuration and parameter specifications of a version of a simulation
+engine.
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "name": "simulation1",
+                "version": "0.01",
+                "command": "path/to/sim-city-client/simulation.py",
+                "parameters": [
+                    {
+                        "name": "model",
+                        "type": "choice",
+                        "choices": ["type1", "type2"],
+                        "default": "type1",
+                        "description": "model instance to run"
+                    },
+                    {
+                        "name": "name",
+                        "type": "str",
+                        "min_length": 3,
+                        "max_length": 32
+                    },
+                    {
+                        "name": "simitems",
+                        "type": "number",
+                        "min": 0,
+                        "max": 100,
+                        "dtype": "float"
+                    }
+                ]
+            }
+
++ Response 404 (application/json)
+    + Attributes
+        + error: Version '0.5' of simulation 'sim1' not found. (string) - error message.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: simulation malconfigured on server (string) - error message.
+
+### Start simulation [POST]
+Start a new simulation using the simulation engine. Parameters required by
+the simulation engine should be provided in the request.
+
++ Attributes
+    + `_id`: task_12345 (string, optional) - unique id of the task
+    + ensemble: ensemble_name (string, required) - ensemble that simulation is part of
+    + `simulation_specific_parameters`: some_value (required) - parameters that are prescribed in the corresponding GET request
+
++ Response 201
+    + Headers
+
+            Location: http://couchdb/database/task_12345
+
++ Response 404 (application/json)
+    + Attributes
+        + error: Version '0.5' of simulation 'sim1' not found. (string) - error message
+
++ Response 409 (application/json)
+    + Attributes
+        + error: simulation name task_12345 already taken (string) - error message.
+
++ Response 412 (application/json)
+    + Attributes
+        + error: input is not json or does not validate against the parameters schema.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: simulation malconfigured on server (string) - error message
+
+## Simulation [/simulation/{id}]
+
++ Parameters
+    + id (string) ... Simulation id
+
+### Simulation [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + `_id`: task_12345 (string) - simulation id
+        + `_rev`: `1-rev-01234` (string) - simulation revision in the database
+        + name: sim1 (string) - simulation engine name
+        + version: sim1 (string) - simulation engine version
+        + ensemble: myensemble (string) - ensemble name
+        + hostname: myensemble (string) - hostname that the simulation was run on
+        + command: `my/path/to/command.py` (string) - command that will run the simulation
+        + lock: 1439388534 (number) - time in seconds that computation on the task started (0 if none, -1 if error)
+        + done: 1439390617 (number) - time in seconds that computation on the task finished (0 if none, -1 if error)
+        + uploads (object) - uploaded files, filename and URL
+            + `some_filename`: http://mydav/path/file1.json (string) - URL of file
+        + input (object) - input parameters for the simulation.
+        + output (object) - output value from the simulation.
+        + `_attachments` (object) - files attached to the couchdb document.
+            + `some_filename` (object)
+                + content_type: application/json (string) - content type of attachment
+                + length: 1000 (number) - length in bytes
+                + digest: `md5-abcdef` (string) - digest of the contents
+                + revpos: 1 (number) - document revision that the file was added or updated
+                + stub: true (boolean) - whether the attachment data is contained in the object
+                + data (string, optional) - actual attachment data
+    + Body
+
+            {
+                "_id": "task_12345",
+                "_rev": "3-abcdef",
+                "name": "sim1",
+                "output": { },
+                "lock": 1439388534,
+                "hostname": "myhost.example.com",
+                "scrub_count": 0,
+                "version": "0.3",
+                "command": "~/path/to/command.py",
+                "uploads": {
+                    "file1.json": "http://webdav.example.com/sim1/file1.json"
+                },
+                "execute_properties": {
+                    "dirs": {
+                        "tmp": "/scratch/local/task_12345",
+                        "input": "/home/me/sim1/input/task_12345",
+                        "output": "/home/me/sim1/output/task_12345"
+                    },
+                    "input_file": "/home/me/sim1/input/task_12345/input.json"
+                },
+                "error": [ ],
+                "done": 1439390617,
+                "type": "task",
+                "ensemble": "myensemble",
+                "input": {
+                    "param1": 21,
+                    "locations1": {
+                        "id": "Netherlands eScience Center",
+                        "x": "52.356923",
+                        "y": "4.954268"
+                    }
+                },
+                "_attachments": {
+                    "file2.json": {
+                        "content_type": "application/json",
+                        "revpos": 3,
+                        "digest": "md5-mYQqQM/2nHpccWNnvwqI8g==",
+                        "length": 515418,
+                        "stub": true
+                    }
+                }
+            }
+
++ Response 404 (application/json)
+
+        {"error": "simulation does not exist"}
+
+### Delete simulation [DELETE /simulation/{id}{?rev}]
+
++ Parameters
+    + id (string) ... Simulation id
+    + rev (string) ... Revision of simulation, as retrieved from a previous get request.
+
++ Response 200 (application/json)
+
+        {"ok": true}
+
++ Response 409 (application/json)
+
+        {"error": "resource conflict or revision not specified"}
+
+
+# Group Resources
+
+## Resource type list [GET /resource]
+Get the names of the resource types configured in the webservice.
+
++ Response 200 (application/json)
+    + Attributes
+        + resources: type1, type2 (array[string]) - resource names
+
+## Resource type definition [GET /resource/{name}]
+Get the resource type.
+
++ Parameters
+    + name (string) ... Name of the resource type
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "id": "matsim",
+                "title": "matsim",
+                "featureTypes": {
+                    "FireStation": {
+                        "id": "SimCity#firestation",
+                        "name": "FireStation",
+                        "style": {
+                            "drawingMode": "Point",
+                            "iconUri": "images/brandweerposten/Brandweerkazerne.png",
+                            "cornerRadius": 50,
+                            "fillColor": "#ffffff",
+                            "iconWidth": 30,
+                            "iconHeight": 30,
+                            "strokeColor": "#ffffff"
+                        },
+                        "propertyTypeKeys": "title,notes",
+                        "u": "bower_components/csweb/dist-bower/images/marker.png"
+                    },
+                    "Fire": {
+                        "id": "SimCity#fire",
+                        "name": "Fire",
+                        "style": {
+                            "drawingMode": "Point",
+                            "iconUri": "data/images/fire.png",
+                            "cornerRadius": 50,
+                            "fillColor": "#ffffff",
+                            "iconWidth": 30,
+                            "iconHeight": 30,
+                            "strokeColor": "#ffffff"
+                        },
+                        "propertyTypeKeys": "title,notes",
+                        "u": "bower_components/csweb/dist-bower/images/marker.png"
+                    }
+                },
+                "propertyTypeData": {},
+                "isDynamic": false
+            }
+        
++ Response 404 (application/json)
+    + Attributes
+        + error: Resource type 'type1' not found. (string) - error message.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: Resource type malconfigured on server (string) - error message.
+
+# Group Schemas
+
+## Schema list [GET /schema]
+Get the names of the schemas configured in the webservice.
+
++ Response 200 (application/json)
+    + Attributes
+        + resources: schema1, schema2 (array[string]) - schema names
+            
+## Resource type definition [GET /schema/{name}]
+Get the resource type.
+
++ Parameters
+    + name (string) ... Name of the resource type
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                $schema: "http://json-schema.org/draft-04/schema#",
+                required: ["x", "y"],
+                type: "object",
+                id: "https://simcity.amsterdam-complexity.nl/explore/schema/point2d",
+                properties: {
+                    y: {
+                        type: "number"
+                    },
+                    x: {
+                        type: "number"
+                    },
+                    id: {
+                        type: "string"
+                    }
+                }
+            }
+
++ Response 404 (application/json)
+    + Attributes
+        + error: Resource type 'schema1' not found. (string) - error message.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: Resource type malconfigured on server (string) - error message.
+
+
+# Group Monitoring
+
+## Overview [GET /view/totals]
+Total number of jobs and tasks, categorized by status
+
++ Response 200 (application/json)
+    + Attributes
+        + pending: 0 (number, optional) - number of tasks to be done
+        + in_progress: 0 (number, optional) - number of tasks currently being processed
+        + done: 0 (number, optional) - number of tasks done processing
+        + error: 0 (number, optional) - number of tasks that resulted in error
+        + `pending_jobs`: 0 (number, optional) - number of jobs submitted but not started
+        + `running_jobs`: 0 (number, optional) - number of jobs currently being processed. This number may include jobs that were stopped before reporting that they were finished.
+        + `finished_jobs`: 0 (number, optional) - number of jobs that have finished processing. This number may include jobs that have reported finished but failed to be reported as queued.
+        + `archived_jobs`: 0 (number, optional) - number of jobs that were archived after completing the entire pipeline of pending to finished.
+        + `active_jobs`: 0 (number, optional) - number of jobs that have not been archived.
+
++ Response 500 (application/json)
+    + Attributes
+        + error: failed to retrieve overview (string) - error message
+
+## Active simulations [GET /view/simulations/{name}/{version}{?ensemble}]
+Simulations configured for a certain simulation engine. If the ensemble name
+is given, only simulations for that ensemble are shown. Even if the result is
+provided directly by a CouchDB database, the call to the webservice is needed
+to ensure that the correct database view exists.
+
++ Parameters
+    + name: sim1 (string) - simulation engine name
+    + version: 0.2 (string) - simulation engine version
+    + ensemble: myensemble (string, optional) - ensemble name
+
++ Response 200 (application/json)
+
+        {
+            "total_rows": 10,
+            "offset": 0,
+            "rows": [
+                {
+                    "id": "task_12345",
+                    "key": "task_12345",
+                    "value": {
+                        "id": "task_12345",
+                        "rev": "3-abcdef",
+                        "ensemble": "myensemble",
+                        "url": "/couchdb/database/task_12345",
+                        "error": [ ],
+                        "lock": 1439388534,
+                        "done": 1439390617,
+                        "input": {
+                            "param1": 21,
+                        }
+                    }
+                },
+                ...
+            ]
+        }
+
++ Response 302 (application/json)
+    + Headers
+
+            Location: http://couchdb/database/_design/view_name/_view/all_docs
+
