@@ -4,10 +4,6 @@ from __future__ import print_function
 
 from simcityweb.cli import dialog, confirm, new_or_overwrite, choice_dialog
 import pystache
-import subprocess
-import shutil
-import stat
-import os
 
 
 def configure():
@@ -86,12 +82,14 @@ def configure():
     #         while not copied:
     #             try:
     #                 path = os.path.expanduser(dialog(
-    #                     "Path to SSH known hosts file", "~/.ssh/known_hosts"))
+    #                     "Path to SSH known hosts file",
+    #                     "~/.ssh/known_hosts"))
     #                 shutil.copy(path, known_hosts_path)
     #                 copied = True
     #             except IOError:
     #                 print("Cannot find file {}".format(path))
-    #     elif new_or_overwrite(known_hosts_path, "Clear SSH known hosts"):
+    #     elif new_or_overwrite(known_hosts_path,
+    #                           "Clear SSH known hosts"):
     #         open(known_hosts_path, 'w').close()
 
     xenon_config = {'launchers': []}
@@ -153,12 +151,14 @@ def configure():
                 except IndexError:
                     xenon_host['name'] = dialog('Launcher name')
                 xenon_host['script'] = dialog('Script to run', 'run.sh')
-                xenon_host['host'] = dialog('Xenon queue url (including schema)')
+                xenon_host['host'] = dialog(
+                    'Xenon queue url (including schema)')
                 xenon_host['path'] = dialog(
                     'Path of runtime script', '~/sim-city-client/scripts')
                 xenon_host['max_time'] = dialog(
                     'Maximum runtime (in minutes)', '60')
-                xenon_host['ignore_version'] = confirm('Ignore the queue-system version?', False)
+                xenon_host['ignore_version'] = confirm(
+                    'Ignore the queue-system version?', False)
                 webconfig['xenon-hosts'].append(xenon_host)
 
             webconfig['ssh-hosts'] = []
