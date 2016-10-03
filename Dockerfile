@@ -23,11 +23,6 @@ RUN virtualenv env \
   && pip install -U pip \
   && pip install -r requirements.txt
 
-USER root
-COPY start.sh /start.sh
-RUN chown -R simcity:simcity /home/simcity
-
-USER simcity
 EXPOSE 9090
 ENTRYPOINT ["/bin/sh"]
-CMD ["/start.sh"]
+CMD ["/home/simcity/sim-city-webservice/start.sh"]
