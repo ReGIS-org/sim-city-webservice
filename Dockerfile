@@ -10,9 +10,10 @@ MAINTAINER Berend Weel <b.weel@esciencecenter.nl>
 RUN apk add --no-cache openjdk7-jre python python-dev py-pip git build-base curl && \
   pip install virtualenv
 
+RUN adduser -D simcity
+
 COPY . /home/simcity/sim-city-webservice
 
-RUN adduser -D simcity
 RUN chown -R simcity:simcity /home/simcity
 
 USER simcity
@@ -23,11 +24,6 @@ RUN virtualenv env \
   && pip install -U pip \
   && pip install -r requirements.txt
 
-USER root
-COPY ./start.sh /home/simcity/start.sh
-RUN chown -R simcity:simcity /home/simcity
-
-USER simcity
 EXPOSE 9090
 ENTRYPOINT ["/bin/sh"]
-CMD ["/start.sh"]
+CMD ["/home/simcity/sim-city-webservice/start.sh"]
