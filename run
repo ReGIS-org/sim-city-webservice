@@ -1,0 +1,4 @@
+#!/bin/sh 
+
+cd /home/simcity/sim-city-webservice
+exec /sbin/setuser simcity ./start.sh
