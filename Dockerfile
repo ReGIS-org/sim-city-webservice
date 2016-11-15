@@ -3,14 +3,14 @@
 #
 # This docker image should not be run as is, but used as a base
 # for a webservice image with a config.ini
-FROM alpine:3.4
+FROM phusion/baseimage:0.9.19
 MAINTAINER Berend Weel <b.weel@esciencecenter.nl>
 
 # install requirements
-RUN apk add --no-cache openjdk7-jre python python-dev py-pip git build-base curl && \
+RUN apt-get update && apt-get install -y python python-dev python-pip git build-essential curl && \
   pip install virtualenv
 
-RUN adduser -D simcity
+RUN /usr/sbin/useradd -p $(openssl passwd simcity) -d /home/simcity -m --shell /bin/bash simcity
 
 COPY . /home/simcity/sim-city-webservice
 
