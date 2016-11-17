@@ -12,7 +12,7 @@ RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 # install requirements
 RUN apt-get update && apt-get upgrade -y -o Dpkg::Options::="--force-confold" && \
-  apt-get install -y python python-dev python-pip git build-essential curl && \
+  apt-get install -y openjdk-8-jre python python-dev python-pip git build-essential curl && \
   pip install virtualenv
 
 RUN /usr/sbin/useradd -p $(openssl passwd simcity) -d /home/simcity -m --shell /bin/bash simcity
