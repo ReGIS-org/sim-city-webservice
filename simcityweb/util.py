@@ -17,6 +17,7 @@
 from bottle import HTTPResponse
 import os
 import json
+import yaml
 from pkg_resources import parse_version
 
 try:
@@ -43,21 +44,40 @@ def abort(status, message):
 
 
 def get_minified_json(path, name):
-    try:
-        with open(os.path.join(path, name + '.min.json')) as f:
-            return json.load(f)
-    except FileNotFound:
-        with open(os.path.join(path, name + '.json')) as f:
-            data = json.load(f)
-
-        try:
-            with open(os.path.join(path, name + '.min.json'), 'w') as f:
-                json.dump(data, f, separators=(',', ':'))
-        except IOError:
-            print('WARNING: cannot write minified json file {0}/{1}.min.json'
-                  .format(path, name))
-
+    yaml_path = os.path.join(path, name + '.yaml')
+    minified_path = os.path.join(path, name + '.min.json')
+    print("Loading minified file from: {0}".format(minified_path))
+    if os.path.isfile(minified_path) and \
+        (not os.path.isfile(yaml_path)
+        or os.path.getmtime(yaml_path) == os.path.getmtime(minified_path)):
+       with open(minified_path, 'r') as f:
+           return json.load(f)
+    else:
+        data = minify_and_load_json(path, name)
         return data
+
+
+def minify_and_load_json(path, name):
+    print("Loading file from json and yaml")
+    yaml_path = os.path.join(path, name + '.yaml')
+    json_path = os.path.join(path, name + '.json')
+    minified_path = os.path.join(path, name + '.min.json')
+    if os.path.isfile(yaml_path):
+        with open(yaml_path) as f:
+            data = yaml.load(f)
+    elif os.path.isfile(json_path):
+        with open(json_path) as f:
+            data = json.load(f)
+    else:
+        raise IOError('Could not open {0} nor {1}'.format(yaml_path, json_path))
+
+    try:
+        with open(minified_path, 'w') as f:
+            json.dump(data, f, separators=(',', ':'))
+    except IOError:
+        print('WARNING: cannot write minified json file {0}/{1}.min.json'
+            .format(path, name))
+    return data
 
 
 # Error checking

@@ -28,6 +28,7 @@ from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
                           PreconditionFailed, ServerError)
 import os
 import json
+import yaml
 import accept_types
 
 simcity.init(None)
@@ -81,7 +82,7 @@ def simulate_list():
     simulations = {}
     try:
         for f in listfiles('simulations'):
-            if not f.endswith('.json') or f.endswith('.min.json'):
+            if not (f.endswith('.yaml') or f.endswith('.json')) or f.endswith('.min.json'):
                 continue
 
             name = f[:-5]
