@@ -260,8 +260,8 @@ def get_attachment(id, attachment):
     if attachment in task.attachments:
         url = simcity.get_task_database().url.rstrip('/')
 
-        if couch_cfg.public_url is not None:
-            url = couch_cfg.public_url
+        if 'public_url' in couch_cfg:
+            url = couch_cfg['public_url'] + couch_cfg['database']
 
         response.status = 302  # temporary redirect
         response.set_header('Location',
