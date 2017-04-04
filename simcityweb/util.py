@@ -18,21 +18,13 @@ from bottle import HTTPResponse
 import os
 import json
 import yaml
+import six
 from pkg_resources import parse_version
 
 try:
     FileNotFound = FileNotFoundError
 except NameError:
     FileNotFound = IOError
-
-
-def make_hash(*args):
-    value = 0x345678
-    for arg in args:
-        value = (1000003 * value) ^ hash(arg)
-    if value == -1:
-        value = -2
-    return value
 
 
 def error(status, message):
@@ -43,10 +35,70 @@ def abort(status, message):
     raise error(status, message)
 
 
+class Simulation:
+    def __init__(self, name, version, description):
+        self.name = name
+        self.version = version
+        if not isinstance(description, dict):
+            raise ValueError
+        self.description = description
+
+
+class SimulationConfig:
+    def __init__(self, name, path):
+        self.simulations = {}
+        self.name = name
+        self.load_simulations(name, path)
+
+    # Error checking
+    def load_simulations(self, name, path):
+        sim = get_json(name, path, 'simulation')
+        versions = sim.keys()
+
+        aliases = {}
+        for version in versions:
+            if isinstance(sim[version], six.string_types):
+                aliases[version] = sim[version]
+            else:
+                self.simulations[version] = self.make_simulation(sim, name, version)
+        
+        for version in aliases:
+            self.simulations[version] = self.get_simulation(version, aliases=aliases)
+
+    def get_simulation(self, version, aliases=None):
+        target_version = self.get_simulation_version(version, aliases=aliases)
+
+        if target_version not in self.simulations:
+            raise KeyError
+        if not isinstance(self.simulations[target_version], Simulation):
+            raise ValueError
+
+        return self.simulations[target_version]
+    
+    def make_simulation(self, sim, name, version):
+        return Simulation(name, version, sim[version])
+
+    def get_simulation_version(self, target_version, aliases=None):
+        """
+        Get the actual version of the Simulation
+        
+        e.g. latest becomes 0.1
+        """
+        if target_version is None:
+            target_version = 'latest'
+        
+        while aliases is not None and target_version in aliases:
+            print("Target version is now: ", target_version)
+            target_version = aliases[target_version]
+
+        return target_version
+    
+    def get_versions(self):
+        return sorted(list(self.simulations.keys()))
+
 def get_minified_json(path, name):
     yaml_path = os.path.join(path, name + '.yaml')
     minified_path = os.path.join(path, name + '.min.json')
-    print("Loading minified file from: {0}".format(minified_path))
     if os.path.isfile(minified_path) and \
         (not os.path.isfile(yaml_path)
         or os.path.getmtime(yaml_path) == os.path.getmtime(minified_path)):
@@ -58,7 +110,6 @@ def get_minified_json(path, name):
 
 
 def minify_and_load_json(path, name):
-    print("Loading file from json and yaml")
     yaml_path = os.path.join(path, name + '.yaml')
     json_path = os.path.join(path, name + '.json')
     minified_path = os.path.join(path, name + '.min.json')
@@ -80,20 +131,6 @@ def minify_and_load_json(path, name):
     return data
 
 
-# Error checking
-def get_simulation_config(name, version, path):
-    sim = get_json(name, path, 'simulation')
-    try:
-        version = get_simulation_version(sim, version)
-    except KeyError:
-        abort(404, 'version "{0}" of simulation "{1}" not found'
-              .format(version, name))
-    except ValueError:
-        abort(500, ('simulation "{0}" is not fully configured on the server; '
-                    'contact the server administrator.').format(name))
-    return sim, version
-
-
 def get_json(name, path, json_type):
     if '/' in name or '\\' in name:
         abort(400, json_type + ' name is malformed')
@@ -107,27 +144,6 @@ def get_json(name, path, json_type):
     except ValueError:
         abort(500, ('{1} "{0}" is not well configured on the server; contact '
                     'the server administrator.').format(name, json_type))
-
-
-def get_simulation_version(sim_specs, target_version):
-    if target_version is None:
-        target_version = 'latest'
-
-    if not isinstance(sim_specs[target_version], dict):
-        target_version = sim_specs[target_version]
-
-    if (target_version not in sim_specs or
-            not isinstance(sim_specs[target_version], dict)):
-        raise ValueError
-
-    return target_version
-
-
-def get_simulation_versions(name):
-    sim = get_simulation_config(name, None, 'simulations')[0]
-    sorted_versions = sorted([parse_version(v) for v in sim.keys()])
-    return [str(version) for version in sorted_versions]
-
 
 def view_to_json(view):
     ret = {

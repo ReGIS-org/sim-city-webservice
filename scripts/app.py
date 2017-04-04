@@ -22,8 +22,8 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
 from simcity.util import listfiles
-from simcityweb.util import get_simulation_versions, view_to_json
-from simcityweb import error, get_simulation_config
+from simcityweb.util import SimulationConfig, Simulation, view_to_json
+from simcityweb import error
 from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
                           PreconditionFailed, ServerError)
 import os
@@ -86,9 +86,10 @@ def simulate_list():
                 continue
 
             name = f[:-5]
+            config = SimulationConfig(name, 'simulations')
             simulations[name] = {
                 'name': name,
-                'versions': get_simulation_versions(name)
+                'versions': config.get_versions()
             }
 
         return simulations
@@ -99,7 +100,8 @@ def simulate_list():
 @get(prefix + '/simulate/<name>')
 def get_simulation_by_name(name):
     try:
-        return {'name': name, 'versions': get_simulation_versions(name)}
+        config = SimulationConfig(name, 'simulations')
+        return {'name': name, 'versions': config.get_versions()}
     except HTTPResponse as ex:
         return ex
 
@@ -107,10 +109,11 @@ def get_simulation_by_name(name):
 @get(prefix + '/simulate/<name>/<version>')
 def get_simulation_by_name_version(name, version=None):
     try:
-        sim, version = get_simulation_config(name, version, 'simulations')
-        chosen_sim = sim[version]
-        chosen_sim['name'] = name
-        chosen_sim['version'] = version
+        config = SimulationConfig(name, 'simulations')
+        sim = config.get_simulation(version)
+        chosen_sim = sim.description
+        chosen_sim['name'] = sim.name
+        chosen_sim['version'] = sim.version
         return chosen_sim
     except HTTPResponse as ex:
         return ex

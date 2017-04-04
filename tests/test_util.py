@@ -16,22 +16,11 @@
 
 from __future__ import print_function
 
-from simcityweb.util import (make_hash, error, abort, get_simulation_config,
-                             get_minified_json, get_simulation_version)
+from simcityweb.util import (error, abort, get_minified_json, SimulationConfig)
 from bottle import HTTPResponse
 from pytest import raises
 import os
-
-
-def test_make_hash():
-    for i in range(10):
-        assert make_hash(i) != make_hash(i + 1)
-        assert make_hash(i) == make_hash(i + 1 - 1)
-
-    for a in "my str":
-        assert make_hash(i) != make_hash(1)
-        assert make_hash(a) == make_hash(chr(ord(a)))
-
+import json
 
 def test_error():
     err = error(400, "message")
@@ -60,36 +49,37 @@ def test_minified_filename(tmpdir):
 
 def test_minified_non_exist(tmpdir):
     f = tmpdir.join("does_not_exist")
-    try:
-        minified_error = FileNotFoundError
-    except NameError:
-        minified_error = IOError
 
-    with raises(minified_error):
+    with raises(IOError):
         get_minified_json(str(f), "does not exist")
 
 
-def test_get_simulation_version():
+def test_get_simulation_version(tmpdir):
     spec = {
         'latest': 'stable',
         'stable': '1.0',
-        '1.0': {},
-        'invalid': '2.0',
+        '1.0': {}
     }
-    assert '1.0' == get_simulation_version(spec, '1.0')
-    assert '1.0' == get_simulation_version(spec, 'stable')
-    raises(KeyError, get_simulation_version, spec, 'no_exist')
-    raises(ValueError, get_simulation_version, spec, 'latest')
-    raises(ValueError, get_simulation_version, spec, 'invalid')
+
+    f = tmpdir.join('test.json')
+    f.write(json.dumps(spec))
+
+    config = SimulationConfig('test', f.dirname)
+
+    assert '1.0' == config.get_simulation('1.0').version
+    assert '1.0' == config.get_simulation('stable').version
+    raises(KeyError, config.get_simulation, 'no_exist')
 
 
 def test_get_simulation_config(tmpdir):
-    spec = '{"latest": "1.0", "1.0": {}, "invalid": "2.0"}'
+    spec = {
+        'latest': '1.0',
+        '1.0': {}
+    }
     f = tmpdir.join('test.json')
-    f.write(spec)
+    f.write(json.dumps(spec))
 
-    assert '1.0' == get_simulation_config('test', '1.0', f.dirname)[1]
-    assert '1.0' == get_simulation_config('test', 'latest', f.dirname)[1]
-    raises(HTTPResponse, get_simulation_config, 'non_exist_sim', 'latest',
-           f.dirname)
-    raises(HTTPResponse, get_simulation_config, 'base', 'invalid', f.dirname)
+    config = SimulationConfig('test', f.dirname)
+
+    assert '1.0' == config.get_versions()[0]
+    assert '1.0' == config.get_simulation('latest').version

@@ -1,5 +1,69 @@
 latest: '0.6'
-stable: '0.6'
+stable: '0.5'
+'0.5': 
+    command: ~/bangalore-matsim/matsim.sh
+    parallelism: '*'
+    resourceTypeUrl: /explore/resource/matsim
+    form:
+        - ensemble 
+        - simulation
+        - key: populationSampleFactor
+          placeholder: Add multiple values here
+        - key: fireStations
+          startEmpty: true
+          add: null
+          remove: null
+          type: layer
+          layer: matsim
+          layerTitle: Matsim Fires and Stations
+          featureId: FireStation
+          items: 
+            - type: point2d
+        - key: fires
+          startEmpty: true
+          add: null
+          remove: null
+          type: layer
+          layer: matsim
+          featureId: Fire
+          layerTitle: Matsim Fires and Stations
+          items:
+            - type: point2d
+    required: [ ensemble simulation populationSampleFactor fireStations fires ]
+    properties: 
+        ensemble: 
+            minLength: 1
+            type: string
+            title: Ensemble Name    
+        simulation: 
+            minLength: 1
+            type: string
+            title: Scenario Name
+        populationSampleFactor: 
+            description: portion of the population (totalling 8.5 million) that commutes
+            title: Population Sample Factor
+            type: number
+            minimum: 0
+            maximum: 1
+            default: 0.1
+        fireStations: 
+            title: Fire stations
+            minItems: 0
+            type: array
+            startEmpty: true
+            items: 
+                $ref: https://simcity.amsterdam-complexity.nl/schema/point2d
+            description: Please add one or more fire stations to the map
+            validationMessage: Please add at least one fire station
+        fires: 
+            title: Fire
+            minItems: 1
+            maxItems: 1
+            type: array
+            items: 
+                $ref: https://simcity.amsterdam-complexity.nl/schema/point2d
+            description: The fire
+            validationMessage: Please add exactly one (1) fire to the map
 '0.6': 
     command: ~/bangalore-matsim/matsim.sh
     parallelism: '*'
@@ -42,14 +106,10 @@ stable: '0.6'
         populationSampleFactor: 
             description: portion of the population (totalling 8.5 million) that commutes
             title: Population Sample Factor
-            type: array
-            minItems: 1
-            items: 
-                type: number
-                minimum: 0
-                maximum: 1
-                default: 0.1
-            format: tokenfield
+            type: number
+            minimum: 0
+            maximum: 1
+            default: 0.1
         fireStations: 
             title: Fire stations
             minItems: 0

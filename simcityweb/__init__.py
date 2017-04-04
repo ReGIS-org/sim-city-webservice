@@ -14,10 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .util import get_simulation_config, get_json, error
+from .util import get_json, error, Simulation, SimulationConfig
 
 __all__ = [
-    'get_simulation_config',
     'get_json',
     'error',
+    'abort',
+    'SimulationConfig',
+    'Simulation'
 ]
