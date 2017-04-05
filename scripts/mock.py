@@ -163,8 +163,9 @@ def simulate_name_version(name, version=None):
         simulate_name_version.nextId += 1
 
     try:
-        sim, version = get_simulation_config(name, version, 'simulations')
-        sim = sim[version]
+        config = SimulationConfig(name, 'simulations')
+        sim = config.get_simulation(version)
+        sim = sim.description
         sim['type'] = 'object'
         sim['additionalProperties'] = False
         parse_parameters(query, sim)

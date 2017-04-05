@@ -94,6 +94,7 @@ stable: '0.5'
           items:
             - type: point2d
     required: [ ensemble simulation populationSampleFactor fireStations fires ]
+    sweep: [populationSampleFactor]
     properties: 
         ensemble: 
             minLength: 1

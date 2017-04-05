@@ -19,6 +19,8 @@ import os
 import json
 import yaml
 import six
+import abc
+import copy
 from pkg_resources import parse_version
 
 try:
@@ -35,19 +37,72 @@ def abort(status, message):
     raise error(status, message)
 
 
+def to_new_dict(keys, dictionary):
+    moved = []
+    new_dict = {}
+    for key in keys:
+        if key in dictionary:
+            new_dict[key] = dictionary[key]
+            moved.append(key)
+    
+    return new_dict, moved
+
+def remove_keys(keys, dictionary):
+    for key in keys:
+        del dictionary[key]
+    return dictionary
+
+class Transformer(object):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def transform(self, description):
+        """Do the transform to the description dict"""
+        return
+
+class ParameterSweep(Transformer):
+    def transform(self, description):
+        sweep = []
+        if 'sweep' in description:
+            sweep = description['sweep']
+        
+        descr = copy.deepcopy(description)
+        properties = descr['properties']
+        for item in sweep:
+            if item in properties:
+                old_type = properties[item]['type']
+                if old_type in ['string', 'number', 'integer', 'boolean'] :
+                    move = ['type', 'format', 'default', 'min', 'max', 'minimum', 'maximum', 
+                            'pattern', 'minLength', 'maxLength']
+                    new_dict, moved = to_new_dict(move, properties[item])
+                    properties[item] = remove_keys(moved, properties[item])
+                    properties[item]['type'] = 'array'
+                    properties[item]['format'] = 'tokenfield'
+                    properties[item]['items'] = new_dict
+
+        print(json.dumps(descr, indent=4))
+        return descr
+
+
 class Simulation:
     def __init__(self, name, version, description):
         self.name = name
         self.version = version
         if not isinstance(description, dict):
-            raise ValueError
+            raise ValueError("Cannot create simulation {0} with version {1},"
+                             "description is not a dictionary: {3}"
+                             .format(name, version, type(description)))
         self.description = description
+
+    def transformed(self, transformer):
+        return Simulation(self.name, self.version, transformer.transform(self.description))
 
 
 class SimulationConfig:
     def __init__(self, name, path):
         self.simulations = {}
         self.name = name
+
         self.load_simulations(name, path)
 
     # Error checking
@@ -65,15 +120,18 @@ class SimulationConfig:
         for version in aliases:
             self.simulations[version] = self.get_simulation(version, aliases=aliases)
 
-    def get_simulation(self, version, aliases=None):
+    def get_simulation(self, version, transformed=False, aliases=None):
         target_version = self.get_simulation_version(version, aliases=aliases)
 
         if target_version not in self.simulations:
-            raise KeyError
+            raise KeyError("Could not find version {1} of simulation {0}".format(self.name, target_version))
         if not isinstance(self.simulations[target_version], Simulation):
-            raise ValueError
+            raise ValueError("{0} version {1} is not a simulation".format(self.name, target_version))
 
-        return self.simulations[target_version]
+        if transformed:
+            return self.simulations[target_version].transformed(ParameterSweep())
+        else:
+            return self.simulations[target_version]
     
     def make_simulation(self, sim, name, version):
         return Simulation(name, version, sim[version])
