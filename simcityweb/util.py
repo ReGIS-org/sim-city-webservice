@@ -87,8 +87,11 @@ class SimulationConfig:
         if target_version is None:
             target_version = 'latest'
         
+        visited = []
         while aliases is not None and target_version in aliases:
-            print("Target version is now: ", target_version)
+            if target_version in visited:
+                raise ValueError("Circular alias detected: ", visited)
+            visited.append(target_version)
             target_version = aliases[target_version]
 
         return target_version

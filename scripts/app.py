@@ -82,7 +82,8 @@ def simulate_list():
     simulations = {}
     try:
         for f in listfiles('simulations'):
-            if not (f.endswith('.yaml') or f.endswith('.json')) or f.endswith('.min.json'):
+            if not (f.endswith('.yaml') or f.endswith('.json'))
+               or f.endswith('.min.json'):
                 continue
 
             name = f[:-5]
@@ -137,8 +138,9 @@ def simulate_name_version(name, version=None):
         del query['_id']
 
     try:
-        sim, version = get_simulation_config(name, version, 'simulations')
-        sim = sim[version]
+        config = SimulationConfig(name, 'simulations')
+        sim = config.get_simulation(version)
+        sim = sim.description
         sim['type'] = 'object'
         sim['additionalProperties'] = False
         simcity.parse_parameters(query, sim)
@@ -233,7 +235,9 @@ def submit_job():
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
-    version = get_simulation_config(name, version, 'simulations')[1]
+    config = SimulationConfig(name, 'simulations')
+    sim = config.get_simulation(version)
+    version = sim.version
     db = simcity.get_task_database()
     design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 

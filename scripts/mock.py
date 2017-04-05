@@ -22,8 +22,8 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 from simcity import parse_parameters
 from simcity.util import listfiles
-from simcityweb.util import get_simulation_versions
-from simcityweb import error, get_simulation_config
+from simcityweb.util import SimulationConfig, Simulation
+from simcityweb import error
 from uuid import uuid4
 import os
 import json
@@ -99,13 +99,15 @@ def simulate_list():
     simulations = {}
     try:
         for f in listfiles('simulations'):
-            if not f.endswith('.json') or f.endswith('.min.json'):
+            if not (f.endswith('.yaml') or f.endswith('.json')) \
+               or f.endswith('.min.json'):
                 continue
 
             name = f[:-5]
+            config = SimulationConfig(name, 'simulations')
             simulations[name] = {
                 'name': name,
-                'versions': get_simulation_versions(name)
+                'versions': config.get_versions()
             }
 
         return simulations
@@ -117,7 +119,8 @@ def simulate_list():
 def get_simulation_by_name(name):
     try:
         response.status = 200
-        return {'name': name, 'versions': get_simulation_versions(name)}
+        config = SimulationConfig(name, 'simulations')
+        return {'name': name, 'versions': config.get_versions()}
     except HTTPResponse as ex:
         return ex
 
@@ -125,10 +128,11 @@ def get_simulation_by_name(name):
 @get(prefix + '/simulate/<name>/<version>')
 def get_simulation_by_name_version(name, version=None):
     try:
-        sim, version = get_simulation_config(name, version, 'simulations')
-        chosen_sim = sim[version]
-        chosen_sim['name'] = name
-        chosen_sim['version'] = version
+        config = SimulationConfig(name, 'simulations')
+        sim = config.get_simulation(version)
+        chosen_sim = sim.description
+        chosen_sim['name'] = sim.name
+        chosen_sim['version'] = sim.version
         response.status = 200
         return chosen_sim
     except HTTPResponse as ex:
@@ -294,7 +298,9 @@ def get_simulation(_id):
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
     ensemble = request.query.get('ensemble')
-    version = get_simulation_config(name, version, 'simulations')[1]
+    config = SimulationConfig(name, 'simulations')
+    sim = config.get_simulation(version)
+    version = sim.version
 
     simulations = [task for k, task in mock_db.items() if
                    task['value']['name'] == name and
