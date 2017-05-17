@@ -7,7 +7,7 @@
             "name": "FireStation",
             "style": {
                 "drawingMode": "Point",
-                "iconUri": "images/brandweerposten/Brandweerkazerne.png",
+                "iconUri": "http://localhost/images/brandweerposten/Brandweerkazerne.png",
                 "cornerRadius": 50,
                 "fillColor": "#ffffff",
                 "iconWidth": 30,
@@ -22,7 +22,7 @@
             "name": "Fire",
             "style": {
                 "drawingMode": "Point",
-                "iconUri": "data/images/fire.png",
+                "iconUri": "http://localhost/data/images/fire.png",
                 "cornerRadius": 50,
                 "fillColor": "#ffffff",
                 "iconWidth": 30,
