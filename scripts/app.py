@@ -253,7 +253,8 @@ def simulations_view(name, version):
         sim = config.get_simulation(version)
         version = sim.version
         db = simcity.get_task_database()
-        design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
+        design_doc = simcity.ensemble_view(db, name, version,
+                                           ensemble=ensemble)
 
         return view_to_json(db.view('all_docs', design_doc=design_doc))
     except KeyError as ex:
