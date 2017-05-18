@@ -22,7 +22,7 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 from simcity import parse_parameters
 from simcity.util import listfiles
-from simcityweb.util import SimulationConfig, Simulation
+from simcityweb.util import SimulationConfig
 from simcityweb import error
 from uuid import uuid4
 import os
@@ -51,6 +51,7 @@ def load_pre_made_tasks():
                 with open(filename) as _file:
                     task = json.load(_file)
                     mock_db[task['id']] = task
+
 
 # WARNING:
 # Loading the json file in this manner probably means
@@ -340,6 +341,7 @@ def del_simulation(_id):
 @get(prefix + '/hosts')
 def get_hosts():
     return config_hosts
+
 
 if __name__ == '__main__':
     run(host='localhost', port=9090, server='wsgiref')

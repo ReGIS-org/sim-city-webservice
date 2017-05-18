@@ -22,13 +22,12 @@ from bottle import (post, get, run, delete, request, response, HTTPResponse,
                     static_file, hook)
 import simcity
 from simcity.util import listfiles
-from simcityweb.util import SimulationConfig, Simulation, view_to_json
+from simcityweb.util import SimulationConfig, view_to_json
 from simcityweb import error
 from couchdb.http import (ResourceConflict, Unauthorized, ResourceNotFound,
                           PreconditionFailed, ServerError)
 import os
 import json
-import yaml
 import accept_types
 
 simcity.init(None)
@@ -82,7 +81,7 @@ def simulate_list():
     simulations = {}
     try:
         for f in listfiles('simulations'):
-            if not (f.endswith('.yaml') or f.endswith('.json'))
+            if not (f.endswith('.yaml') or f.endswith('.json')) \
                or f.endswith('.min.json'):
                 continue
 
@@ -319,6 +318,7 @@ def get_hosts():
                 hosts[host_name]['default'] = True
 
     return hosts
+
 
 if __name__ == '__main__':
     run(host='localhost', port=9090, server='gevent')

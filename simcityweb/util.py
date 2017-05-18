@@ -21,7 +21,6 @@ import yaml
 import six
 import abc
 import copy
-from pkg_resources import parse_version
 
 try:
     FileNotFound = FileNotFoundError
@@ -44,13 +43,15 @@ def to_new_dict(keys, dictionary):
         if key in dictionary:
             new_dict[key] = dictionary[key]
             moved.append(key)
-    
+
     return new_dict, moved
+
 
 def remove_keys(keys, dictionary):
     for key in keys:
         del dictionary[key]
     return dictionary
+
 
 class Transformer(object):
     __metaclass__ = abc.ABCMeta
@@ -60,20 +61,22 @@ class Transformer(object):
         """Do the transform to the description dict"""
         return
 
+
 class ParameterSweep(Transformer):
     def transform(self, description):
         sweep = []
         if 'sweep' in description:
             sweep = description['sweep']
-        
+
         descr = copy.deepcopy(description)
         properties = descr['properties']
         for item in sweep:
             if item in properties:
                 old_type = properties[item]['type']
-                if old_type in ['string', 'number', 'integer', 'boolean'] :
-                    move = ['type', 'format', 'default', 'min', 'max', 'minimum', 'maximum', 
-                            'pattern', 'minLength', 'maxLength']
+                if old_type in ['string', 'number', 'integer', 'boolean']:
+                    move = ['type', 'format', 'default', 'min', 'max',
+                            'minimum', 'maximum', 'pattern', 'minLength',
+                            'maxLength']
                     new_dict, moved = to_new_dict(move, properties[item])
                     properties[item] = remove_keys(moved, properties[item])
                     properties[item]['type'] = 'array'
@@ -95,7 +98,8 @@ class Simulation:
         self.description = description
 
     def transformed(self, transformer):
-        return Simulation(self.name, self.version, transformer.transform(self.description))
+        return Simulation(self.name, self.version,
+                          transformer.transform(self.description))
 
 
 class SimulationConfig:
@@ -115,36 +119,41 @@ class SimulationConfig:
             if isinstance(sim[version], six.string_types):
                 aliases[version] = sim[version]
             else:
-                self.simulations[version] = self.make_simulation(sim, name, version)
-        
+                self.simulations[version] = self.make_simulation(sim, name,
+                                                                 version)
+
         for version in aliases:
-            self.simulations[version] = self.get_simulation(version, aliases=aliases)
+            self.simulations[version] = self.get_simulation(version,
+                                                            aliases=aliases)
 
     def get_simulation(self, version, transformed=False, aliases=None):
         target_version = self.get_simulation_version(version, aliases=aliases)
 
         if target_version not in self.simulations:
-            raise KeyError("Could not find version {1} of simulation {0}".format(self.name, target_version))
+            raise KeyError("Could not find version {1} of simulation {0}"
+                           .format(self.name, target_version))
         if not isinstance(self.simulations[target_version], Simulation):
-            raise ValueError("{0} version {1} is not a simulation".format(self.name, target_version))
+            raise ValueError("{0} version {1} is not a simulation"
+                             .format(self.name, target_version))
 
         if transformed:
-            return self.simulations[target_version].transformed(ParameterSweep())
+            return self.simulations[target_version].transformed(
+                ParameterSweep())
         else:
             return self.simulations[target_version]
-    
+
     def make_simulation(self, sim, name, version):
         return Simulation(name, version, sim[version])
 
     def get_simulation_version(self, target_version, aliases=None):
         """
         Get the actual version of the Simulation
-        
+
         e.g. latest becomes 0.1
         """
         if target_version is None:
             target_version = 'latest'
-        
+
         visited = []
         while aliases is not None and target_version in aliases:
             if target_version in visited:
@@ -153,18 +162,19 @@ class SimulationConfig:
             target_version = aliases[target_version]
 
         return target_version
-    
+
     def get_versions(self):
         return sorted(list(self.simulations.keys()))
+
 
 def get_minified_json(path, name):
     yaml_path = os.path.join(path, name + '.yaml')
     minified_path = os.path.join(path, name + '.min.json')
     if os.path.isfile(minified_path) and \
-        (not os.path.isfile(yaml_path)
-        or os.path.getmtime(yaml_path) == os.path.getmtime(minified_path)):
-       with open(minified_path, 'r') as f:
-           return json.load(f)
+        (not os.path.isfile(yaml_path) or
+         os.path.getmtime(yaml_path) == os.path.getmtime(minified_path)):
+        with open(minified_path, 'r') as f:
+            return json.load(f)
     else:
         data = minify_and_load_json(path, name)
         return data
@@ -181,14 +191,15 @@ def minify_and_load_json(path, name):
         with open(json_path) as f:
             data = json.load(f)
     else:
-        raise IOError('Could not open {0} nor {1}'.format(yaml_path, json_path))
+        raise IOError('Could not open {0} nor {1}'.format(yaml_path,
+                                                          json_path))
 
     try:
         with open(minified_path, 'w') as f:
             json.dump(data, f, separators=(',', ':'))
     except IOError:
         print('WARNING: cannot write minified json file {0}/{1}.min.json'
-            .format(path, name))
+              .format(path, name))
     return data
 
 
@@ -205,6 +216,7 @@ def get_json(name, path, json_type):
     except ValueError:
         abort(500, ('{1} "{0}" is not well configured on the server; contact '
                     'the server administrator.').format(name, json_type))
+
 
 def view_to_json(view):
     ret = {
