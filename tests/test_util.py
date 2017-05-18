@@ -22,6 +22,7 @@ from pytest import raises
 import os
 import json
 
+
 def test_error():
     err = error(400, "message")
     assert HTTPResponse == type(err)

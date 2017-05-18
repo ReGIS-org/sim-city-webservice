@@ -95,6 +95,10 @@ def simulate_list():
         return simulations
     except HTTPResponse as ex:
         return ex
+    except KeyError as ex:
+        return error(404, str(ex))
+    except ValueError as ex:
+        return error(412, str(ex))
 
 
 @get(prefix + '/simulate/<name>')
@@ -104,6 +108,10 @@ def get_simulation_by_name(name):
         return {'name': name, 'versions': config.get_versions()}
     except HTTPResponse as ex:
         return ex
+    except KeyError as ex:
+        return error(404, str(ex))
+    except ValueError as ex:
+        return error(412, str(ex))
 
 
 @get(prefix + '/simulate/<name>/<version>')
@@ -117,6 +125,10 @@ def get_simulation_by_name_version(name, version=None):
         return chosen_sim
     except HTTPResponse as ex:
         return ex
+    except KeyError as ex:
+        return error(404, str(ex))
+    except ValueError as ex:
+        return error(412, str(ex))
 
 
 @post(prefix + '/simulate/<name>')
@@ -145,6 +157,8 @@ def simulate_name_version(name, version=None):
         simcity.parse_parameters(query, sim)
     except HTTPResponse as ex:
         return ex
+    except KeyError as ex:
+        return error(404, str(ex))
     except ValueError as ex:
         return error(412, str(ex))
     except EnvironmentError as ex:
@@ -233,14 +247,19 @@ def submit_job():
 
 @get(prefix + '/view/simulations/<name>/<version>')
 def simulations_view(name, version):
-    ensemble = request.query.get('ensemble')
-    config = SimulationConfig(name, 'simulations')
-    sim = config.get_simulation(version)
-    version = sim.version
-    db = simcity.get_task_database()
-    design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
+    try:
+        ensemble = request.query.get('ensemble')
+        config = SimulationConfig(name, 'simulations')
+        sim = config.get_simulation(version)
+        version = sim.version
+        db = simcity.get_task_database()
+        design_doc = simcity.ensemble_view(db, name, version, ensemble=ensemble)
 
-    return view_to_json(db.view('all_docs', design_doc=design_doc))
+        return view_to_json(db.view('all_docs', design_doc=design_doc))
+    except KeyError as ex:
+        return error(404, str(ex))
+    except ValueError as ex:
+        return error(412, str(ex))
 
 
 @get(prefix + '/view/jobs')
