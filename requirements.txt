@@ -18,4 +18,5 @@ pyxenon==0.2.2
 PyYAML==3.11
 requests==2.11.1
 tqdm==4.8.4
+six==1.10.0
 -e git+https://github.com/indodutch/sim-city-client.git@develop#egg=simcity-0.4[xenon]
