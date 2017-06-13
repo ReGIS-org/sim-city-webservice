@@ -211,7 +211,6 @@ def get_json(name, path, json_type):
     if '/' in name or '\\' in name:
         abort(400, json_type + ' name is malformed')
 
-    print("getting json: ", path, "n: ", name, "t:", json_type)
     try:
         return get_minified_json(path, name)
     except FileNotFound:
