@@ -169,12 +169,16 @@ class SimulationConfig:
 
 def get_minified_json(path, name):
     yaml_path = os.path.join(path, name + '.yaml')
+    json_path = os.path.join(path, name + '.json')
     minified_path = os.path.join(path, name + '.min.json')
-    if os.path.isfile(minified_path) and \
-        (not os.path.isfile(yaml_path) or
-         os.path.getmtime(yaml_path) == os.path.getmtime(minified_path)):
-        with open(minified_path, 'r') as f:
-            return json.load(f)
+
+    if (os.path.isfile(minified_path) and
+        (os.path.isfile(yaml_path) and os.path.getmtime(yaml_path) <=
+         os.path.getmtime(minified_path)) or
+        (os.path.isfile(json_path) and os.path.getmtime(json_path) <=
+         os.path.getmtime(minified_path))):
+            with open(minified_path, 'r') as f:
+                return json.load(f)
     else:
         data = minify_and_load_json(path, name)
         return data
@@ -207,6 +211,7 @@ def get_json(name, path, json_type):
     if '/' in name or '\\' in name:
         abort(400, json_type + ' name is malformed')
 
+    print("getting json: ", path, "n: ", name, "t:", json_type)
     try:
         return get_minified_json(path, name)
     except FileNotFound:
