@@ -173,10 +173,10 @@ def get_minified_json(path, name):
     minified_path = os.path.join(path, name + '.min.json')
 
     if (os.path.isfile(minified_path) and
-        (os.path.isfile(yaml_path) and os.path.getmtime(yaml_path) <=
+        ((os.path.isfile(yaml_path) and os.path.getmtime(yaml_path) <=
          os.path.getmtime(minified_path)) or
         (os.path.isfile(json_path) and os.path.getmtime(json_path) <=
-         os.path.getmtime(minified_path))):
+         os.path.getmtime(minified_path)))):
             with open(minified_path, 'r') as f:
                 return json.load(f)
     else:
