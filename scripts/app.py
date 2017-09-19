@@ -157,6 +157,10 @@ def simulate_name_version(name, version=None):
         task_props['ensemble'] = query['ensemble']
     if 'simulation' in query:
         task_props['simulation'] = query['simulation']
+    if 'defaultFeatureType' in sim:
+        task_props['defaultFeatureType'] = sim['defaultFeatureType']
+    if 'resourceTypeUrl' in sim:
+        task_props['typeUrl'] = sim['resourceTypeUrl']
 
     if task_id is not None:
         task_props['_id'] = task_id
